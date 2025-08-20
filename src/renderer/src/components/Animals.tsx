@@ -3,6 +3,15 @@ import type { Animal } from '../../../main/database'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
 import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from './ui/dialog'
+import {
     Table,
     TableBody,
     TableCell,
@@ -82,15 +91,13 @@ export function Animals(): JSX.Element {
     }
 
     const handleDelete = async (id: number): Promise<void> => {
-        if (confirm('Are you sure you want to delete this animal?')) {
-            try {
-                await window.api.deleteAnimal(id)
-                toast.success('Animal deleted successfully')
-                loadAnimals()
-            } catch (error) {
-                toast.error('Error deleting animal')
-                console.error('Error deleting animal:', error)
-            }
+        try {
+            await window.api.deleteAnimal(id)
+            toast.success('Animal deleted successfully')
+            loadAnimals()
+        } catch (error) {
+            toast.error('Error deleting animal')
+            console.error('Error deleting animal:', error)
         }
     }
 
@@ -288,13 +295,29 @@ export function Animals(): JSX.Element {
                                             </form>
                                         </SheetContent>
                                     </Sheet>
-                                    <Button
-                                        variant="destructive"
-                                        size="sm"
-                                        onClick={() => handleDelete(animal.id)}
-                                    >
-                                        Delete
-                                    </Button>
+                                    <Dialog>
+                                        <DialogTrigger asChild>
+                                            <Button variant="destructive" size="sm">
+                                                Delete
+                                            </Button>
+                                        </DialogTrigger>
+                                        <DialogContent>
+                                            <DialogHeader>
+                                                <DialogTitle>Are you sure you want to delete this animal?</DialogTitle>
+                                                <DialogDescription>
+                                                    This action cannot be undone. This will permanently delete {animal.name}.
+                                                </DialogDescription>
+                                            </DialogHeader>
+                                            <DialogFooter>
+                                                <Button variant="outline">
+                                                    Cancel
+                                                </Button>
+                                                <Button variant="destructive" onClick={() => handleDelete(animal.id)}>
+                                                    Delete
+                                                </Button>
+                                            </DialogFooter>
+                                        </DialogContent>
+                                    </Dialog>
                                 </div>
                             </TableCell>
                         </TableRow>
