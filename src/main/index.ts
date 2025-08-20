@@ -2,6 +2,7 @@ import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
+import { databaseService } from './database'
 
 function createWindow(): void {
   // Create the browser window.
@@ -13,7 +14,9 @@ function createWindow(): void {
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
-      sandbox: false
+      sandbox: false,
+      contextIsolation: true,
+      nodeIntegration: true
     }
   })
 
@@ -47,6 +50,17 @@ app.whenReady().then(() => {
   // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
+  })
+
+  // Set up IPC handlers for database operations
+  ipcMain.handle('get-app-info', async () => {
+    try {
+      const appInfo = databaseService.getAppInfo()
+      return appInfo
+    } catch (error) {
+      console.error('Main process - Error getting app info:', error)
+      throw error
+    }
   })
 
   // IPC test
