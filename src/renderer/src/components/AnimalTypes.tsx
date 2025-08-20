@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@renderer/components/ui/button'
+import { Toaster } from '@renderer/components/ui/sonner'
+import { toast } from 'sonner'
 import {
   Sheet,
   SheetClose,
@@ -10,6 +12,15 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@renderer/components/ui/sheet'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@renderer/components/ui/dialog'
 import { Input } from '@renderer/components/ui/input'
 import { Label } from '@renderer/components/ui/label'
 import {
@@ -46,30 +57,45 @@ export function AnimalTypes() {
     loadAnimalTypes()
   }, [])
 
-  const handleSubmit = async () => {
-    if (selectedType) {
-      await window.api.updateAnimalType(selectedType.id, name, description)
-    } else {
-      await window.api.createAnimalType(name, description)
+  const handleSubmit = async (): Promise<void> => {
+    try {
+      if (selectedType) {
+        await window.api.updateAnimalType(selectedType.id, name, description)
+        toast.success('Animal type updated successfully')
+      } else {
+        await window.api.createAnimalType(name, description)
+        toast.success('Animal type created successfully')
+      }
+      setSelectedType(null)
+      setName('')
+      setDescription('')
+      loadAnimalTypes()
+    } catch (error: unknown) {
+      if (error instanceof Error && error.message.includes('UNIQUE constraint failed')) {
+        toast.error('An animal type with this name already exists')
+      } else {
+        toast.error('An error occurred while saving the animal type')
+      }
     }
-    setSelectedType(null)
-    setName('')
-    setDescription('')
-    loadAnimalTypes()
   }
 
-  const handleDelete = async (id: number) => {
-    await window.api.deleteAnimalType(id)
-    loadAnimalTypes()
+  const handleDelete = async (id: number): Promise<void> => {
+    try {
+      await window.api.deleteAnimalType(id)
+      toast.success('Animal type deleted successfully')
+      loadAnimalTypes()
+    } catch (error) {
+      toast.error('An error occurred while deleting the animal type')
+    }
   }
 
-  const handleEdit = (type: AnimalType) => {
+  const handleEdit = (type: AnimalType): void => {
     setSelectedType(type)
     setName(type.name)
     setDescription(type.description)
   }
 
-  const handleAdd = () => {
+  const handleAdd = (): void => {
     setSelectedType(null)
     setName('')
     setDescription('')
@@ -78,6 +104,7 @@ export function AnimalTypes() {
 
   return (
     <div className="p-4">
+      <Toaster />
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold">Animal Types</h2>
         <Sheet>
@@ -185,9 +212,27 @@ export function AnimalTypes() {
                     </SheetFooter>
                   </SheetContent>
                 </Sheet>
-                <Button variant="destructive" onClick={() => handleDelete(type.id)}>
-                  Delete
-                </Button>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button variant="destructive">Delete</Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Delete Animal Type</DialogTitle>
+                      <DialogDescription>
+                        Are you sure you want to delete &quot;{type.name}&quot;? This action cannot be undone.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                      <Button
+                        variant="destructive"
+                        onClick={() => handleDelete(type.id)}
+                      >
+                        Delete
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
               </TableCell>
             </TableRow>
           ))}
