@@ -4,6 +4,7 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { databaseService } from './database'
 import { registerAnimalTypeHandlers } from './handlers/animalTypes'
+import { registerAnimalHandlers } from './handlers/animals'
 
 function createWindow(): void {
   // Create the browser window.
@@ -55,6 +56,7 @@ app.whenReady().then(() => {
 
   // Set up IPC handlers for database operations
   registerAnimalTypeHandlers()
+  registerAnimalHandlers()
 
   ipcMain.handle('get-app-info', async () => {
     try {

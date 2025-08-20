@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Navigation } from '@renderer/components/Navigation'
 import { AnimalTypes } from '@renderer/components/AnimalTypes'
+import { Animals } from '@renderer/components/Animals'
 
 interface AppInfo {
   id: number
@@ -40,6 +41,8 @@ function App(): React.JSX.Element {
             <p className="text-gray-400">{appInfo?.description}</p>
           </div>
         )
+      case '/animals':
+        return <Animals />
       case '/settings':
         return <AnimalTypes />
       default:

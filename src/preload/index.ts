@@ -11,7 +11,14 @@ const api = {
     ipcRenderer.invoke('create-animal-type', name, description),
   updateAnimalType: (id: number, name: string, description: string) =>
     ipcRenderer.invoke('update-animal-type', id, name, description),
-  deleteAnimalType: (id: number) => ipcRenderer.invoke('delete-animal-type', id)
+  deleteAnimalType: (id: number) => ipcRenderer.invoke('delete-animal-type', id),
+
+  // Animals API
+  getAnimals: () => ipcRenderer.invoke('get-animals'),
+  getAnimal: (id: number) => ipcRenderer.invoke('get-animal', id),
+  createAnimal: (data) => ipcRenderer.invoke('create-animal', data),
+  updateAnimal: (id: number, data) => ipcRenderer.invoke('update-animal', id, data),
+  deleteAnimal: (id: number) => ipcRenderer.invoke('delete-animal', id)
 }
 
 // Expose protected methods that allow the renderer process to use

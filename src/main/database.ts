@@ -17,6 +17,18 @@ export interface AnimalType {
   updated_at: string;
 }
 
+export interface Animal {
+  id: number;
+  name: string;
+  breed: string;
+  age: number;
+  type_id: number;
+  description: string;
+  created_at: string;
+  updated_at: string;
+  type?: AnimalType;
+}
+
 class DatabaseService {
   private db: Database.Database;
 
@@ -35,6 +47,21 @@ class DatabaseService {
         description TEXT,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    // Create animals table if it doesn't exist
+    this.db.exec(`
+      CREATE TABLE IF NOT EXISTS animals (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        breed TEXT,
+        age INTEGER,
+        type_id INTEGER NOT NULL,
+        description TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (type_id) REFERENCES animal_types(id)
       )
     `);
 
@@ -105,6 +132,77 @@ class DatabaseService {
 
   deleteAnimalType(id: number): void {
     this.db.prepare('DELETE FROM animal_types WHERE id = ?').run(id);
+  }
+
+  // Animals CRUD operations
+  getAllAnimals(): Animal[] {
+    return this.db.prepare(`
+      SELECT animals.*, animal_types.name as type_name, animal_types.description as type_description
+      FROM animals
+      LEFT JOIN animal_types ON animals.type_id = animal_types.id
+      ORDER BY animals.name
+    `).all().map((row: any) => ({
+      ...row,
+      type: row.type_name ? {
+        id: row.type_id,
+        name: row.type_name,
+        description: row.type_description
+      } : undefined
+    })) as Animal[];
+  }
+
+  getAnimalById(id: number): Animal | undefined {
+    const animal = this.db.prepare(`
+      SELECT animals.*, animal_types.name as type_name, animal_types.description as type_description
+      FROM animals
+      LEFT JOIN animal_types ON animals.type_id = animal_types.id
+      WHERE animals.id = ?
+    `).get(id);
+
+    if (!animal) return undefined;
+
+    return {
+      ...animal,
+      type: animal.type_name ? {
+        id: animal.type_id,
+        name: animal.type_name,
+        description: animal.type_description
+      } : undefined
+    } as Animal;
+  }
+
+  createAnimal(data: Omit<Animal, 'id' | 'created_at' | 'updated_at'>): Animal {
+    const result = this.db.prepare(
+      'INSERT INTO animals (name, breed, age, type_id, description) VALUES (?, ?, ?, ?, ?) RETURNING *'
+    ).get(data.name, data.breed, data.age, data.type_id, data.description) as Animal;
+    return this.getAnimalById(result.id)!;
+  }
+
+  updateAnimal(id: number, data: Partial<Omit<Animal, 'id' | 'created_at' | 'updated_at'>>): Animal | undefined {
+    const now = new Date().toISOString();
+    const current = this.getAnimalById(id);
+    if (!current) return undefined;
+
+    const result = this.db.prepare(`
+      UPDATE animals
+      SET name = ?, breed = ?, age = ?, type_id = ?, description = ?, updated_at = ?
+      WHERE id = ?
+      RETURNING *
+    `).get(
+      data.name ?? current.name,
+      data.breed ?? current.breed,
+      data.age ?? current.age,
+      data.type_id ?? current.type_id,
+      data.description ?? current.description,
+      now,
+      id
+    ) as Animal | undefined;
+
+    return result ? this.getAnimalById(result.id) : undefined;
+  }
+
+  deleteAnimal(id: number): void {
+    this.db.prepare('DELETE FROM animals WHERE id = ?').run(id);
   }
 
   debugDumpTable(): void {

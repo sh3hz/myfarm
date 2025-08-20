@@ -6,6 +6,7 @@ import { cn } from '@renderer/lib/utils'
 
 const navigation = [
   { name: 'Home', href: '/', icon: Home },
+  { name: 'Animals', href: '/animals', icon: Monitor },
   { name: 'Categories', href: '/settings', icon: Settings },
 ]
 
