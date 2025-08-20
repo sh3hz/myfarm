@@ -44,7 +44,6 @@ interface AnimalType {
 export function AnimalTypes() {
   const [animalTypes, setAnimalTypes] = useState<AnimalType[]>([])
   const [selectedType, setSelectedType] = useState<AnimalType | null>(null)
-  const [isAdding, setIsAdding] = useState(false)
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
 
@@ -99,7 +98,6 @@ export function AnimalTypes() {
     setSelectedType(null)
     setName('')
     setDescription('')
-    setIsAdding(true)
   }
 
   return (

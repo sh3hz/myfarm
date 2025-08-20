@@ -45,26 +45,12 @@ const defaultAnimal: AnimalFormData = {
   image: ''
 }
 
-export function Animals(): JSX.Element {
+export function Animals(): React.ReactElement {
   const [animals, setAnimals] = useState<Animal[]>([])
   const [animalTypes, setAnimalTypes] = useState<{ id: number; name: string }[]>([])
   const [selectedAnimal, setSelectedAnimal] = useState<Animal | null>(null)
   const [formData, setFormData] = useState<AnimalFormData>(defaultAnimal)
   const [imagePaths, setImagePaths] = useState<Record<string, string>>({})
-
-  const getImagePath = async (relativePath: string) => {
-    if (!relativePath) return animalPlaceholder
-    if (imagePaths[relativePath]) return imagePaths[relativePath]
-
-    try {
-      const fullPath = await window.api.getImagePath(relativePath)
-      setImagePaths(prev => ({ ...prev, [relativePath]: fullPath || animalPlaceholder }))
-      return fullPath || animalPlaceholder
-    } catch (error) {
-      console.error('Error getting image path:', error)
-      return animalPlaceholder
-    }
-  }
 
   const loadAnimals = async (): Promise<void> => {
     const fetchedAnimals = await window.api.getAnimals()

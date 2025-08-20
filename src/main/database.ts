@@ -175,14 +175,38 @@ class DatabaseService {
 
     if (!animal) return undefined;
 
-    return {
-      ...animal,
-      type: animal.type_name ? {
-        id: animal.type_id,
-        name: animal.type_name,
-        description: animal.type_description
+    // Type assertion for the database result
+    const dbAnimal = animal as {
+      id: number;
+      name: string;
+      breed: string;
+      age: number;
+      type_id: number;
+      description: string;
+      image: string;
+      type_name: string | null;
+      type_description: string | null;
+    };
+
+    const result: Animal = {
+      id: dbAnimal.id,
+      name: dbAnimal.name,
+      breed: dbAnimal.breed,
+      age: dbAnimal.age,
+      type_id: dbAnimal.type_id,
+      description: dbAnimal.description,
+      image: dbAnimal.image,
+      created_at: (animal as any).created_at,
+      updated_at: (animal as any).updated_at,
+      type: dbAnimal.type_name ? {
+        id: dbAnimal.type_id,
+        name: dbAnimal.type_name,
+        description: dbAnimal.type_description || '',
+        created_at: (animal as any).created_at,
+        updated_at: (animal as any).updated_at
       } : undefined
-    } as Animal;
+    };
+    return result;
   }
 
   createAnimal(data: Omit<Animal, 'id' | 'created_at' | 'updated_at'>): Animal {
@@ -221,7 +245,7 @@ class DatabaseService {
   }
 
   debugDumpTable(): void {
-    const all = this.db.prepare('SELECT * FROM app_info').all();
+    this.db.prepare('SELECT * FROM app_info').all();
   }
 }
 

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Button } from '@renderer/components/ui/button'
 import { Sheet, SheetContent, SheetTrigger } from '@renderer/components/ui/sheet'
-import { Monitor, Menu, Home, Settings } from 'lucide-react'
+import { PawPrint, Monitor, Menu, Home, Settings } from 'lucide-react'
 import { cn } from '@renderer/lib/utils'
 
 const navigation = [
@@ -29,7 +29,7 @@ export function Navigation({ currentPath, onNavigate }: NavigationProps) {
         {/* Logo and App Name */}
         <div className="flex items-center gap-3">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <Monitor className="h-5 w-5" />
+            <PawPrint className="h-5 w-5" />
           </div>
           <div className="hidden font-semibold sm:block">
             <span className="text-lg">Vite App</span>

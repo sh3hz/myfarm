@@ -6,6 +6,15 @@ declare module '*.svg' {
 }
 
 interface Window {
+  electron: {
+    process: {
+      versions: {
+        electron: string;
+        chrome: string;
+        node: string;
+      };
+    };
+  };
   api: {
     getAppInfo: () => Promise<any>
     getAnimalTypes: () => Promise<any[]>
