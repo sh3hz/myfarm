@@ -6,15 +6,19 @@ import { cn } from '@renderer/lib/utils'
 
 const navigation = [
   { name: 'Home', href: '/', icon: Home },
-  { name: 'Settings', href: '/settings', icon: Settings },
+  { name: 'Categories', href: '/settings', icon: Settings },
 ]
 
-export function Navigation() {
-  const [currentPath, setCurrentPath] = useState('/')
+interface NavigationProps {
+  currentPath: string
+  onNavigate: (path: string) => void
+}
+
+export function Navigation({ currentPath, onNavigate }: NavigationProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   const handleNavigation = (path: string) => {
-    setCurrentPath(path)
+    onNavigate(path)
     setMobileMenuOpen(false)
   }
 

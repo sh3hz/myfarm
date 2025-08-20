@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Navigation } from '@renderer/components/Navigation'
+import { AnimalTypes } from '@renderer/components/AnimalTypes'
 
 interface AppInfo {
   id: number
@@ -27,15 +28,30 @@ function App(): React.JSX.Element {
     loadAppInfo()
   }, [])
 
+  const [currentPath, setCurrentPath] = useState('/')
+
+  const renderContent = () => {
+    switch (currentPath) {
+      case '/':
+        return (
+          <div className="flex flex-col items-center justify-center gap-4">
+            <h1 className="text-2xl font-bold">{appInfo?.name}</h1>
+            <p className="text-gray-500">Version: {appInfo?.version}</p>
+            <p className="text-gray-400">{appInfo?.description}</p>
+          </div>
+        )
+      case '/settings':
+        return <AnimalTypes />
+      default:
+        return null
+    }
+  }
+
   return (
     <>
-      <Navigation />
+      <Navigation onNavigate={setCurrentPath} currentPath={currentPath} />
       <div className="container py-8">
-        <div className="flex flex-col items-center justify-center gap-4">
-          <h1 className="text-2xl font-bold">{appInfo?.name}</h1>
-          <p className="text-gray-500">Version: {appInfo?.version}</p>
-          <p className="text-gray-400">{appInfo?.description}</p>
-        </div>
+        {renderContent()}
       </div>
     </>
   )

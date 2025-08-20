@@ -3,7 +3,15 @@ import { electronAPI } from '@electron-toolkit/preload'
 
 // Custom APIs for renderer
 const api = {
-  getAppInfo: () => ipcRenderer.invoke('get-app-info')
+  getAppInfo: () => ipcRenderer.invoke('get-app-info'),
+  // Animal Types API
+  getAnimalTypes: () => ipcRenderer.invoke('get-animal-types'),
+  getAnimalType: (id: number) => ipcRenderer.invoke('get-animal-type', id),
+  createAnimalType: (name: string, description: string) =>
+    ipcRenderer.invoke('create-animal-type', name, description),
+  updateAnimalType: (id: number, name: string, description: string) =>
+    ipcRenderer.invoke('update-animal-type', id, name, description),
+  deleteAnimalType: (id: number) => ipcRenderer.invoke('delete-animal-type', id)
 }
 
 // Expose protected methods that allow the renderer process to use

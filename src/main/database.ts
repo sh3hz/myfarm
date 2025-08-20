@@ -9,6 +9,14 @@ export interface AppInfo {
   description: string;
 }
 
+export interface AnimalType {
+  id: number;
+  name: string;
+  description: string;
+  created_at: string;
+  updated_at: string;
+}
+
 class DatabaseService {
   private db: Database.Database;
 
@@ -19,6 +27,17 @@ class DatabaseService {
   }
 
   private init() {
+    // Create animal_types table if it doesn't exist
+    this.db.exec(`
+      CREATE TABLE IF NOT EXISTS animal_types (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL UNIQUE,
+        description TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
     // Create app_info table if it doesn't exist
     this.db.exec(`
       CREATE TABLE IF NOT EXISTS app_info (
@@ -58,6 +77,34 @@ class DatabaseService {
           description = COALESCE(?, description)
       WHERE id = (SELECT id FROM app_info ORDER BY id DESC LIMIT 1)
     `).run(name, version, description);
+  }
+
+  // Animal Types CRUD operations
+  getAllAnimalTypes(): AnimalType[] {
+    return this.db.prepare('SELECT * FROM animal_types ORDER BY name').all() as AnimalType[];
+  }
+
+  getAnimalTypeById(id: number): AnimalType | undefined {
+    return this.db.prepare('SELECT * FROM animal_types WHERE id = ?').get(id) as AnimalType | undefined;
+  }
+
+  createAnimalType(name: string, description: string): AnimalType {
+    const result = this.db.prepare(
+      'INSERT INTO animal_types (name, description) VALUES (?, ?) RETURNING *'
+    ).get(name, description) as AnimalType;
+    return result;
+  }
+
+  updateAnimalType(id: number, name: string, description: string): AnimalType | undefined {
+    const now = new Date().toISOString();
+    const result = this.db.prepare(
+      'UPDATE animal_types SET name = ?, description = ?, updated_at = ? WHERE id = ? RETURNING *'
+    ).get(name, description, now, id) as AnimalType | undefined;
+    return result;
+  }
+
+  deleteAnimalType(id: number): void {
+    this.db.prepare('DELETE FROM animal_types WHERE id = ?').run(id);
   }
 
   debugDumpTable(): void {
