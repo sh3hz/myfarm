@@ -321,7 +321,17 @@ export function Animals(): JSX.Element {
                         </SheetDescription>
                       </SheetHeader>
                       <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-                        {/* Form fields (same as add form) */}
+                        {formData.image && (
+                          <div className="flex justify-center mb-4">
+                            <div className="relative w-32 h-32 overflow-hidden rounded-full bg-muted">
+                              <img
+                                src={imagePaths[formData.image] || animalPlaceholder}
+                                alt="Current"
+                                className="object-cover w-full h-full"
+                              />
+                            </div>
+                          </div>
+                        )}
                         <div className="space-y-2">
                           <Label htmlFor="edit-name">Name</Label>
                           <Input
@@ -376,6 +386,41 @@ export function Animals(): JSX.Element {
                             name="description"
                             value={formData.description}
                             onChange={handleInputChange}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="edit-image">Replace Image</Label>
+                          <Input
+                            id="edit-image"
+                            name="image"
+                            type="file"
+                            accept="image/*"
+                            className="flex-1"
+                            onChange={async (e) => {
+                              const file = e.target.files?.[0]
+                              if (file) {
+                                try {
+                                  const reader = new FileReader()
+                                  reader.onload = async (e) => {
+                                    const imageData = e.target?.result as string
+                                    const savedPath = await window.api.saveImage(imageData)
+                                    const fullPath = await window.api.getImagePath(savedPath)
+                                    setImagePaths(prev => ({
+                                      ...prev,
+                                      [savedPath]: fullPath || animalPlaceholder
+                                    }))
+                                    setFormData(prev => ({
+                                      ...prev,
+                                      image: savedPath
+                                    }))
+                                  }
+                                  reader.readAsDataURL(file)
+                                } catch (error) {
+                                  toast.error('Error uploading image')
+                                  console.error('Error uploading image:', error)
+                                }
+                              }
+                            }}
                           />
                         </div>
                         <div className="flex gap-4 mt-4">
