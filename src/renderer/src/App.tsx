@@ -1,5 +1,5 @@
-import { Button } from '@renderer/components/ui/button'
 import { useEffect, useState } from 'react'
+import { Navigation } from '@renderer/components/Navigation'
 
 interface AppInfo {
   id: number
@@ -29,13 +29,13 @@ function App(): React.JSX.Element {
 
   return (
     <>
-      <div className="flex flex-col items-center justify-center min-h-svh gap-4">
-        <h1 className="text-2xl font-bold">{appInfo?.name}</h1>
-        <p className="text-gray-500">Version: {appInfo?.version}</p>
-        <p className="text-gray-400">{appInfo?.description}</p>
-        <Button variant="default" size="lg">
-          Welcome
-        </Button>
+      <Navigation />
+      <div className="container py-8">
+        <div className="flex flex-col items-center justify-center gap-4">
+          <h1 className="text-2xl font-bold">{appInfo?.name}</h1>
+          <p className="text-gray-500">Version: {appInfo?.version}</p>
+          <p className="text-gray-400">{appInfo?.description}</p>
+        </div>
       </div>
     </>
   )
