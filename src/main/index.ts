@@ -5,6 +5,7 @@ import icon from '../../resources/icon.png?asset'
 import { databaseService } from './database'
 import { registerAnimalTypeHandlers } from './handlers/animalTypes'
 import { registerAnimalHandlers } from './handlers/animals'
+import { registerFileHandlers } from './handlers/files'
 
 function createWindow(): void {
   // Create the browser window.
@@ -57,6 +58,7 @@ app.whenReady().then(() => {
   // Set up IPC handlers for database operations
   registerAnimalTypeHandlers()
   registerAnimalHandlers()
+  registerFileHandlers()
 
   ipcMain.handle('get-app-info', async () => {
     try {

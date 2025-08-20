@@ -24,6 +24,7 @@ export interface Animal {
   age: number;
   type_id: number;
   description: string;
+  image?: string;
   created_at: string;
   updated_at: string;
   type?: AnimalType;
@@ -50,7 +51,7 @@ class DatabaseService {
       )
     `);
 
-    // Create animals table if it doesn't exist
+        // Create animals table if it doesn't exist
     this.db.exec(`
       CREATE TABLE IF NOT EXISTS animals (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -59,11 +60,24 @@ class DatabaseService {
         age INTEGER,
         type_id INTEGER NOT NULL,
         description TEXT,
+        image TEXT,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (type_id) REFERENCES animal_types(id)
       )
     `);
+
+    // Add image column to animals table if it doesn't exist
+    try {
+      const tableInfo = this.db.prepare("PRAGMA table_info(animals)").all();
+      const hasImageColumn = tableInfo.some((column: any) => column.name === 'image');
+
+      if (!hasImageColumn) {
+        this.db.exec('ALTER TABLE animals ADD COLUMN image TEXT');
+      }
+    } catch (error) {
+      console.error('Error checking/adding image column:', error);
+    }
 
     // Create app_info table if it doesn't exist
     this.db.exec(`
@@ -173,8 +187,8 @@ class DatabaseService {
 
   createAnimal(data: Omit<Animal, 'id' | 'created_at' | 'updated_at'>): Animal {
     const result = this.db.prepare(
-      'INSERT INTO animals (name, breed, age, type_id, description) VALUES (?, ?, ?, ?, ?) RETURNING *'
-    ).get(data.name, data.breed, data.age, data.type_id, data.description) as Animal;
+      'INSERT INTO animals (name, breed, age, type_id, description, image) VALUES (?, ?, ?, ?, ?, ?) RETURNING *'
+    ).get(data.name, data.breed, data.age, data.type_id, data.description, data.image) as Animal;
     return this.getAnimalById(result.id)!;
   }
 
@@ -185,7 +199,7 @@ class DatabaseService {
 
     const result = this.db.prepare(`
       UPDATE animals
-      SET name = ?, breed = ?, age = ?, type_id = ?, description = ?, updated_at = ?
+      SET name = ?, breed = ?, age = ?, type_id = ?, description = ?, image = ?, updated_at = ?
       WHERE id = ?
       RETURNING *
     `).get(
@@ -194,6 +208,7 @@ class DatabaseService {
       data.age ?? current.age,
       data.type_id ?? current.type_id,
       data.description ?? current.description,
+      data.image ?? current.image,
       now,
       id
     ) as Animal | undefined;

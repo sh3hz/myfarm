@@ -29,9 +29,11 @@ import {
 } from './ui/sheet'
 import { Label } from './ui/label'
 import { toast } from 'sonner'
+import animalPlaceholder from '../assets/animal-placeholder.svg'
 
 interface AnimalFormData extends Omit<Animal, 'id' | 'created_at' | 'updated_at' | 'type'> {
   type_id: number
+  image?: string
 }
 
 const defaultAnimal: AnimalFormData = {
@@ -39,7 +41,8 @@ const defaultAnimal: AnimalFormData = {
   breed: '',
   age: 0,
   type_id: 0,
-  description: ''
+  description: '',
+  image: ''
 }
 
 export function Animals(): JSX.Element {
@@ -47,6 +50,21 @@ export function Animals(): JSX.Element {
   const [animalTypes, setAnimalTypes] = useState<{ id: number; name: string }[]>([])
   const [selectedAnimal, setSelectedAnimal] = useState<Animal | null>(null)
   const [formData, setFormData] = useState<AnimalFormData>(defaultAnimal)
+  const [imagePaths, setImagePaths] = useState<Record<string, string>>({})
+
+  const getImagePath = async (relativePath: string) => {
+    if (!relativePath) return animalPlaceholder
+    if (imagePaths[relativePath]) return imagePaths[relativePath]
+
+    try {
+      const fullPath = await window.api.getImagePath(relativePath)
+      setImagePaths(prev => ({ ...prev, [relativePath]: fullPath || animalPlaceholder }))
+      return fullPath || animalPlaceholder
+    } catch (error) {
+      console.error('Error getting image path:', error)
+      return animalPlaceholder
+    }
+  }
 
   const loadAnimals = async (): Promise<void> => {
     const fetchedAnimals = await window.api.getAnimals()
@@ -62,6 +80,20 @@ export function Animals(): JSX.Element {
     loadAnimals()
     loadAnimalTypes()
   }, [])
+
+  useEffect(() => {
+    const loadImages = async () => {
+      const paths: Record<string, string> = {}
+      for (const animal of animals) {
+        if (animal.image) {
+          const path = await window.api.getImagePath(animal.image)
+          paths[animal.image] = path || animalPlaceholder
+        }
+      }
+      setImagePaths(paths)
+    }
+    loadImages()
+  }, [animals])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>): void => {
     const { name, value } = e.target
@@ -108,7 +140,8 @@ export function Animals(): JSX.Element {
       breed: animal.breed,
       age: animal.age,
       type_id: animal.type_id,
-      description: animal.description
+      description: animal.description,
+      image: animal.image
     })
   }
 
@@ -189,6 +222,52 @@ export function Animals(): JSX.Element {
                   onChange={handleInputChange}
                 />
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="image">Image</Label>
+                <div className="flex items-center space-x-2">
+                  {formData.image && (
+                    <div className="relative w-10 h-10 overflow-hidden rounded-full bg-muted">
+                      <img
+                        src={formData.image ? imagePaths[formData.image] || animalPlaceholder : animalPlaceholder}
+                        alt="Preview"
+                        className="object-cover w-full h-full"
+                      />
+                    </div>
+                  )}
+                  <Input
+                    id="image"
+                    name="image"
+                    type="file"
+                    accept="image/*"
+                    className="flex-1"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0]
+                      if (file) {
+                        try {
+                          const reader = new FileReader()
+                          reader.onload = async (e) => {
+                            const imageData = e.target?.result as string
+                            const savedPath = await window.api.saveImage(imageData)
+                            const fullPath = await window.api.getImagePath(savedPath)
+                            setImagePaths(prev => ({
+                              ...prev,
+                              [savedPath]: fullPath || animalPlaceholder
+                            }))
+                            setFormData(prev => ({
+                              ...prev,
+                              image: savedPath
+                            }))
+                          }
+                          reader.readAsDataURL(file)
+                        } catch (error) {
+                          toast.error('Error uploading image')
+                          console.error('Error uploading image:', error)
+                        }
+                      }
+                    }}
+                  />
+                </div>
+              </div>
               <Button type="submit" className="w-full">
                 {selectedAnimal ? 'Update' : 'Create'} Animal
               </Button>
@@ -200,6 +279,7 @@ export function Animals(): JSX.Element {
       <Table>
         <TableHeader>
           <TableRow>
+            <TableHead>Image</TableHead>
             <TableHead>Name</TableHead>
             <TableHead>Breed</TableHead>
             <TableHead>Age</TableHead>
@@ -211,6 +291,15 @@ export function Animals(): JSX.Element {
         <TableBody>
           {animals.map(animal => (
             <TableRow key={animal.id}>
+              <TableCell>
+                <div className="relative w-10 h-10 overflow-hidden rounded-full bg-muted">
+                  <img
+                    src={animal.image ? imagePaths[animal.image] || animalPlaceholder : animalPlaceholder}
+                    alt={animal.name}
+                    className="object-cover w-full h-full"
+                  />
+                </div>
+              </TableCell>
               <TableCell>{animal.name}</TableCell>
               <TableCell>{animal.breed}</TableCell>
               <TableCell>{animal.age}</TableCell>

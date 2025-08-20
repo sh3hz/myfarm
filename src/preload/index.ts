@@ -18,7 +18,11 @@ const api = {
   getAnimal: (id: number) => ipcRenderer.invoke('get-animal', id),
   createAnimal: (data) => ipcRenderer.invoke('create-animal', data),
   updateAnimal: (id: number, data) => ipcRenderer.invoke('update-animal', id, data),
-  deleteAnimal: (id: number) => ipcRenderer.invoke('delete-animal', id)
+  deleteAnimal: (id: number) => ipcRenderer.invoke('delete-animal', id),
+
+  // File handling API
+  saveImage: (imageData: string) => ipcRenderer.invoke('save-image', imageData),
+  getImagePath: (relativePath: string) => ipcRenderer.invoke('get-image-path', relativePath)
 }
 
 // Expose protected methods that allow the renderer process to use
