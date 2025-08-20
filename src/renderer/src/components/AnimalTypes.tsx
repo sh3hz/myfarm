@@ -205,34 +205,36 @@ export function AnimalTypes() {
                         />
                       </div>
                     </div>
-                    <SheetFooter>
+                    <SheetFooter className="flex gap-4">
                       <SheetClose asChild>
-                        <Button onClick={handleSubmit} type="submit">Save changes</Button>
+                        <Button onClick={handleSubmit} type="submit" className="flex-1">Save changes</Button>
                       </SheetClose>
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button variant="destructive" type="button">Delete</Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Delete Animal Type</DialogTitle>
+                            <DialogDescription>
+                              Are you sure you want to delete &quot;{type.name}&quot;? This action cannot be undone.
+                            </DialogDescription>
+                          </DialogHeader>
+                          <DialogFooter>
+                            <Button variant="outline" type="button">Cancel</Button>
+                            <Button
+                              variant="destructive"
+                              type="button"
+                              onClick={() => handleDelete(type.id)}
+                            >
+                              Delete
+                            </Button>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
                     </SheetFooter>
                   </SheetContent>
                 </Sheet>
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button variant="destructive">Delete</Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Delete Animal Type</DialogTitle>
-                      <DialogDescription>
-                        Are you sure you want to delete &quot;{type.name}&quot;? This action cannot be undone.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <DialogFooter>
-                      <Button
-                        variant="destructive"
-                        onClick={() => handleDelete(type.id)}
-                      >
-                        Delete
-                      </Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
               </TableCell>
             </TableRow>
           ))}
