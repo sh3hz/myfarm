@@ -29,7 +29,7 @@ import {
 } from './ui/sheet'
 import { Label } from './ui/label'
 import { toast } from 'sonner'
-import animalPlaceholder from '../assets/animal-placeholder.svg'
+import { PawPrint } from 'lucide-react'
 
 interface AnimalFormData extends Omit<Animal, 'id' | 'created_at' | 'updated_at' | 'type'> {
   type_id: number
@@ -72,7 +72,7 @@ export function Animals(): React.ReactElement {
       for (const animal of animals) {
         if (animal.image) {
           const path = await window.api.getImagePath(animal.image)
-          paths[animal.image] = path || animalPlaceholder
+          paths[animal.image] = path || ''
         }
       }
       setImagePaths(paths)
@@ -209,15 +209,17 @@ export function Animals(): React.ReactElement {
               <div className="space-y-2">
                 <Label htmlFor="image">Image</Label>
                 <div className="flex items-center space-x-2">
-                  {formData.image && (
-                    <div className="relative w-10 h-10 overflow-hidden rounded-full bg-muted">
+                  <div className="relative w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                    {formData.image && imagePaths[formData.image] ? (
                       <img
-                        src={formData.image ? imagePaths[formData.image] || animalPlaceholder : animalPlaceholder}
+                        src={imagePaths[formData.image]}
                         alt="Preview"
                         className="object-cover w-full h-full"
                       />
-                    </div>
-                  )}
+                    ) : (
+                      <PawPrint className="w-5 h-5 text-muted-foreground" />
+                    )}
+                  </div>
                   <Input
                     id="image"
                     name="image"
@@ -235,7 +237,7 @@ export function Animals(): React.ReactElement {
                             const fullPath = await window.api.getImagePath(savedPath)
                             setImagePaths(prev => ({
                               ...prev,
-                              [savedPath]: fullPath || animalPlaceholder
+                              [savedPath]: fullPath
                             }))
                             setFormData(prev => ({
                               ...prev,
@@ -276,12 +278,16 @@ export function Animals(): React.ReactElement {
           {animals.map(animal => (
             <TableRow key={animal.id}>
               <TableCell>
-                <div className="relative w-10 h-10 overflow-hidden rounded-full bg-muted">
-                  <img
-                    src={animal.image ? imagePaths[animal.image] || animalPlaceholder : animalPlaceholder}
-                    alt={animal.name}
-                    className="object-cover w-full h-full"
-                  />
+                <div className="relative w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                  {animal.image && imagePaths[animal.image] ? (
+                    <img
+                      src={imagePaths[animal.image]}
+                      alt={animal.name}
+                      className="object-cover w-full h-full"
+                    />
+                  ) : (
+                    <PawPrint className="w-5 h-5 text-muted-foreground" />
+                  )}
                 </div>
               </TableCell>
               <TableCell>{animal.name}</TableCell>
@@ -307,12 +313,16 @@ export function Animals(): React.ReactElement {
                       <form onSubmit={handleSubmit} className="space-y-4 mt-4">
                         {formData.image && (
                           <div className="flex justify-center mb-4">
-                            <div className="relative w-32 h-32 overflow-hidden rounded-full bg-muted">
-                              <img
-                                src={imagePaths[formData.image] || animalPlaceholder}
-                                alt="Current"
-                                className="object-cover w-full h-full"
-                              />
+                            <div className="relative w-32 h-32 rounded-full bg-muted flex items-center justify-center">
+                              {formData.image && imagePaths[formData.image] ? (
+                                <img
+                                  src={imagePaths[formData.image]}
+                                  alt="Current"
+                                  className="object-cover w-full h-full"
+                                />
+                              ) : (
+                                <PawPrint className="w-16 h-16 text-muted-foreground" />
+                              )}
                             </div>
                           </div>
                         )}
@@ -391,7 +401,7 @@ export function Animals(): React.ReactElement {
                                     const fullPath = await window.api.getImagePath(savedPath)
                                     setImagePaths(prev => ({
                                       ...prev,
-                                      [savedPath]: fullPath || animalPlaceholder
+                                      [savedPath]: fullPath
                                     }))
                                     setFormData(prev => ({
                                       ...prev,

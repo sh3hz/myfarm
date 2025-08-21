@@ -155,7 +155,6 @@ export function AnimalTypes() {
           <TableRow>
             <TableHead>Name</TableHead>
             <TableHead>Description</TableHead>
-            <TableHead>Created At</TableHead>
             <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -164,7 +163,6 @@ export function AnimalTypes() {
             <TableRow key={type.id}>
               <TableCell>{type.name}</TableCell>
               <TableCell>{type.description}</TableCell>
-              <TableCell>{new Date(type.created_at).toLocaleDateString()}</TableCell>
               <TableCell>
                 <Sheet>
                   <SheetTrigger asChild>

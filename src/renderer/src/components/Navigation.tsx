@@ -32,8 +32,8 @@ export function Navigation({ currentPath, onNavigate }: NavigationProps) {
             <PawPrint className="h-5 w-5" />
           </div>
           <div className="hidden font-semibold sm:block">
-            <span className="text-lg">Vite App</span>
-            <p className="text-xs text-muted-foreground">Electron + React</p>
+            <span className="text-lg">MyFarm</span>
+            <p className="text-xs text-muted-foreground">The Animal Manager</p>
           </div>
         </div>
 
