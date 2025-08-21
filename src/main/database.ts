@@ -337,8 +337,13 @@ class DatabaseService {
   }
 
   // Get animal statistics
-  async getAnimalStats() {
-    const stats = this.db.prepare(`
+  async getAnimalStats(): Promise<{
+    totalTypes: number;
+    totalAnimals: number;
+    mostCommonType: string;
+    mostCommonTypeCount: number;
+  }> {
+    const row = this.db.prepare(`
       SELECT 
         (SELECT COUNT(DISTINCT type_id) FROM animals) as totalTypes,
         (SELECT COUNT(*) FROM animals) as totalAnimals,
@@ -354,16 +359,22 @@ class DatabaseService {
          GROUP BY type_id 
          ORDER BY count DESC 
          LIMIT 1) as mostCommonTypeCount
-    `).get();
+    `).get([]) as {
+      totalTypes: number;
+      totalAnimals: number;
+      mostCommonType: string | null;
+      mostCommonTypeCount: number;
+    } | undefined;
 
     return {
-      totalTypes: stats.totalTypes || 0,
-      totalAnimals: stats.totalAnimals || 0,
-      mostCommonType: stats.mostCommonType || 'None',
-      mostCommonTypeCount: stats.mostCommonTypeCount || 0
+      totalTypes: row?.totalTypes ?? 0,
+      totalAnimals: row?.totalAnimals ?? 0,
+      mostCommonType: row?.mostCommonType ?? 'None',
+      mostCommonTypeCount: row?.mostCommonTypeCount ?? 0
     };
   }
 }
+
 
 // Create database service instance
 export const databaseService = new DatabaseService();

@@ -29,5 +29,6 @@ interface Window {
     deleteAnimal: (id: number) => Promise<void>
     saveImage: (imageData: string) => Promise<string>
     getImagePath: (relativePath: string) => Promise<string>
+    getAnimalStats: () => Promise<any>
   }
 }

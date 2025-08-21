@@ -1,36 +1,49 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { Navigation } from '@renderer/components/Navigation'
 import { AnimalTypes } from '@renderer/components/AnimalTypes'
 import { Animals } from '@renderer/components/Animals'
 import { SummaryCards } from '@renderer/components/SummaryCards'
 
-interface AppInfo {
-  id: number
-  name: string
-  version: string
-  description: string
-}
-
 function App(): React.JSX.Element {
-  const [appInfo, setAppInfo] = useState<AppInfo | null>(null)
-
-  useEffect(() => {
-    const loadAppInfo = async () => {
-      try {
-        const info = await window.api.getAppInfo()
-        if (!info) {
-          console.error('Renderer - No app info received')
-          return
-        }
-        setAppInfo(info)
-      } catch (error) {
-        console.error('Renderer - Failed to load app info:', error)
-      }
-    }
-    loadAppInfo()
-  }, [])
+  
 
   const [currentPath, setCurrentPath] = useState('/')
+  const animalsRef = useRef<{ openDialog: () => void }>(null)
+  const animalTypesRef = useRef<{ openDialog: () => void }>(null)
+
+  useEffect(() => {
+    const handleOpenAnimalDialog = () => {
+      if (currentPath !== '/animals') {
+        setCurrentPath('/animals')
+        // Small timeout to ensure the Animals component is mounted
+        setTimeout(() => {
+          animalsRef.current?.openDialog()
+        }, 100)
+      } else {
+        animalsRef.current?.openDialog()
+      }
+    }
+
+    const handleOpenAnimalTypeDialog = () => {
+      if (currentPath !== '/settings') {
+        setCurrentPath('/settings')
+        // Small timeout to ensure the AnimalTypes component is mounted
+        setTimeout(() => {
+          animalTypesRef.current?.openDialog()
+        }, 100)
+      } else {
+        animalTypesRef.current?.openDialog()
+      }
+    }
+
+    window.addEventListener('open-animal-dialog', handleOpenAnimalDialog)
+    window.addEventListener('open-animal-type-dialog', handleOpenAnimalTypeDialog)
+
+    return () => {
+      window.removeEventListener('open-animal-dialog', handleOpenAnimalDialog)
+      window.removeEventListener('open-animal-type-dialog', handleOpenAnimalTypeDialog)
+    }
+  }, [currentPath])
 
   const renderContent = () => {
     switch (currentPath) {
@@ -46,9 +59,9 @@ function App(): React.JSX.Element {
           </div>
         )
       case '/animals':
-        return <Animals />
+        return <Animals ref={animalsRef} />
       case '/settings':
-        return <AnimalTypes />
+        return <AnimalTypes ref={animalTypesRef} />
       default:
         return null
     }

@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, forwardRef } from 'react'
+import * as React from 'react'
 import type { Animal, Gender } from '../../../main/database'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
@@ -64,13 +65,23 @@ const defaultAnimal: AnimalFormData = {
   exitReason: ''
 }
 
-export function Animals(): React.ReactElement {
+interface AnimalsHandles {
+  openDialog: () => void
+}
+
+export const Animals = forwardRef<AnimalsHandles>((_, ref) => {
   const [animals, setAnimals] = useState<Animal[]>([])
   const [animalTypes, setAnimalTypes] = useState<{ id: number; name: string }[]>([])
   const [selectedAnimal, setSelectedAnimal] = useState<Animal | null>(null)
   const [formData, setFormData] = useState<AnimalFormData>(defaultAnimal)
   const [imagePaths, setImagePaths] = useState<Record<string, string>>({})
   const [drawerOpen, setDrawerOpen] = useState(false)
+
+  React.useImperativeHandle(ref, () => ({
+    openDialog: (): void => {
+      setDrawerOpen(true)
+    }
+  }))
 
   const loadAnimals = async (): Promise<void> => {
     const fetchedAnimals = await window.api.getAnimals()
@@ -469,8 +480,8 @@ export function Animals(): React.ReactElement {
         <TableHeader>
           <TableRow>
             <TableHead>Image</TableHead>
-            <TableHead>ID</TableHead>
             <TableHead>Name</TableHead>
+            <TableHead>ID</TableHead>
             <TableHead>Breed</TableHead>
             <TableHead>Gender</TableHead>
             <TableHead>Age</TableHead>
@@ -496,8 +507,8 @@ export function Animals(): React.ReactElement {
                   )}
                 </div>
               </TableCell>
-              <TableCell className="font-mono text-xs">{animal.tagNumber || `#${animal.id}`}</TableCell>
               <TableCell className="font-medium">{animal.name}</TableCell>
+              <TableCell className="font-mono text-xs">{animal.tagNumber}</TableCell>
               <TableCell>{animal.breed || '-'}</TableCell>
               <TableCell>
                 {animal.gender === 'MALE' ? '♂' : 
@@ -522,4 +533,6 @@ export function Animals(): React.ReactElement {
       </Table>
     </div>
   )
-}
+})
+
+Animals.displayName = 'Animals'

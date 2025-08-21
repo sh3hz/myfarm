@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, forwardRef, useImperativeHandle } from 'react'
 import { Button } from '@renderer/components/ui/button'
 import { Toaster } from '@renderer/components/ui/sonner'
 import { toast } from 'sonner'
@@ -41,13 +41,27 @@ interface AnimalType {
   updated_at: string
 }
 
-export function AnimalTypes() {
+interface AnimalTypesHandles {
+  openDialog: () => void
+}
+
+export const AnimalTypes = forwardRef<AnimalTypesHandles>((_, ref) => {
   const [animalTypes, setAnimalTypes] = useState<AnimalType[]>([])
   const [selectedType, setSelectedType] = useState<AnimalType | null>(null)
+  const [addOpen, setAddOpen] = useState(false)
+
+  useImperativeHandle(ref, () => ({
+    openDialog: () => {
+      setSelectedType(null)
+      setName('')
+      setDescription('')
+      setAddOpen(true)
+    }
+  }))
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
 
-  const loadAnimalTypes = async () => {
+  const loadAnimalTypes = async (): Promise<void> => {
     const types = await window.api.getAnimalTypes()
     setAnimalTypes(types)
   }
@@ -56,7 +70,8 @@ export function AnimalTypes() {
     loadAnimalTypes()
   }, [])
 
-  const handleSubmit = async (): Promise<void> => {
+  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
+    e.preventDefault()
     try {
       if (selectedType) {
         await window.api.updateAnimalType(selectedType.id, name, description)
@@ -105,7 +120,7 @@ export function AnimalTypes() {
       <Toaster />
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold">Animal Types</h2>
-        <Sheet>
+        <Sheet open={addOpen} onOpenChange={setAddOpen}>
           <SheetTrigger asChild>
             <Button onClick={handleAdd}>Add Animal Type</Button>
           </SheetTrigger>
@@ -238,4 +253,6 @@ export function AnimalTypes() {
       </Table>
     </div>
   )
-}
+})
+
+AnimalTypes.displayName = 'AnimalTypes'
