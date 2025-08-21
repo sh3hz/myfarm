@@ -21,7 +21,10 @@ const api = {
 
   // File handling API
   saveImage: (imageData: string) => ipcRenderer.invoke('save-image', imageData),
-  getImagePath: (relativePath: string) => ipcRenderer.invoke('get-image-path', relativePath)
+  getImagePath: (relativePath: string) => ipcRenderer.invoke('get-image-path', relativePath),
+  
+  // Statistics API
+  getAnimalStats: () => ipcRenderer.invoke('get-animal-stats')
 }
 
 // Expose protected methods that allow the renderer process to use

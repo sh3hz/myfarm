@@ -40,6 +40,13 @@ declare global {
       createAnimal: (data: Omit<Animal, 'id' | 'created_at' | 'updated_at' | 'type'>) => Promise<Animal>
       updateAnimal: (id: number, data: Partial<Omit<Animal, 'id' | 'created_at' | 'updated_at' | 'type'>>) => Promise<Animal | undefined>
       deleteAnimal: (id: number) => Promise<void>
+      // Animal statistics
+      getAnimalStats: () => Promise<{
+        totalTypes: number
+        totalAnimals: number
+        mostCommonType: string
+        mostCommonTypeCount: number
+      }>
     }
   }
 }

@@ -328,6 +328,41 @@ class DatabaseService {
   debugDumpTable(): void {
     this.db.prepare('SELECT * FROM app_info').all();
   }
+
+  debugDump() {
+    console.log('=== Animal Types ===');
+    console.log(this.db.prepare('SELECT * FROM animal_types').all());
+    console.log('=== Animals ===');
+    console.log(this.db.prepare('SELECT * FROM animals').all());
+  }
+
+  // Get animal statistics
+  async getAnimalStats() {
+    const stats = this.db.prepare(`
+      SELECT 
+        (SELECT COUNT(DISTINCT type_id) FROM animals) as totalTypes,
+        (SELECT COUNT(*) FROM animals) as totalAnimals,
+        (SELECT name FROM animal_types WHERE id = (
+          SELECT type_id 
+          FROM animals 
+          GROUP BY type_id 
+          ORDER BY COUNT(*) DESC 
+          LIMIT 1
+        )) as mostCommonType,
+        (SELECT COUNT(*) as count 
+         FROM animals 
+         GROUP BY type_id 
+         ORDER BY count DESC 
+         LIMIT 1) as mostCommonTypeCount
+    `).get();
+
+    return {
+      totalTypes: stats.totalTypes || 0,
+      totalAnimals: stats.totalAnimals || 0,
+      mostCommonType: stats.mostCommonType || 'None',
+      mostCommonTypeCount: stats.mostCommonTypeCount || 0
+    };
+  }
 }
 
 // Create database service instance

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Navigation } from '@renderer/components/Navigation'
 import { AnimalTypes } from '@renderer/components/AnimalTypes'
 import { Animals } from '@renderer/components/Animals'
+import { SummaryCards } from '@renderer/components/SummaryCards'
 
 interface AppInfo {
   id: number
@@ -35,10 +36,13 @@ function App(): React.JSX.Element {
     switch (currentPath) {
       case '/':
         return (
-          <div className="flex flex-col items-center justify-center gap-4">
-            <h1 className="text-2xl font-bold">{appInfo?.name}</h1>
-            <p className="text-gray-500">Version: {appInfo?.version}</p>
-            <p className="text-gray-400">{appInfo?.description}</p>
+          <div className="space-y-6">
+            
+            <SummaryCards />
+            
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {/* Add more dashboard widgets here in the future */}
+            </div>
           </div>
         )
       case '/animals':
