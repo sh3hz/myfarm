@@ -76,6 +76,8 @@ export const Animals = forwardRef<AnimalsHandles>((_, ref) => {
   const [formData, setFormData] = useState<AnimalFormData>(defaultAnimal)
   const [imagePaths, setImagePaths] = useState<Record<string, string>>({})
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const [viewOpen, setViewOpen] = useState(false)
+  const [viewAnimal, setViewAnimal] = useState<Animal | null>(null)
 
   React.useImperativeHandle(ref, () => ({
     openDialog: (): void => {
@@ -391,7 +393,7 @@ export const Animals = forwardRef<AnimalsHandles>((_, ref) => {
                 <div className="space-y-2">
                   <Label htmlFor="image">Image</Label>
                   <div className="flex items-center space-x-2">
-                    <div className="relative w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                    <div className="relative w-16 h-16 rounded-full bg-muted flex items-center justify-center">
                       {formData.image && imagePaths[formData.image] ? (
                         <img
                           src={imagePaths[formData.image]}
@@ -399,7 +401,7 @@ export const Animals = forwardRef<AnimalsHandles>((_, ref) => {
                           className="object-cover w-full h-full"
                         />
                       ) : (
-                        <PawPrint className="w-5 h-5 text-muted-foreground" />
+                        <PawPrint className="w-7 h-7 text-muted-foreground" />
                       )}
                     </div>
                     <Input
@@ -479,6 +481,84 @@ export const Animals = forwardRef<AnimalsHandles>((_, ref) => {
         </Drawer>
       </div>
 
+      {/* Animal Profile Dialog */}
+      <Dialog open={viewOpen} onOpenChange={setViewOpen}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>{viewAnimal?.name}</DialogTitle>
+          </DialogHeader>
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+            {/* Left: Large Image + Description */}
+            <div className="space-y-3">
+              <div className="relative w-full aspect-square rounded-lg bg-muted overflow-hidden flex items-center justify-center">
+                {viewAnimal?.image && imagePaths[viewAnimal.image] ? (
+                  <img
+                    src={imagePaths[viewAnimal.image]}
+                    alt={viewAnimal.name}
+                    className="object-cover w-full h-full"
+                  />
+                ) : (
+                  <PawPrint className="w-20 h-20 text-muted-foreground" />
+                )}
+              </div>
+              <div className="text-sm text-muted-foreground">
+                {viewAnimal?.description || 'No description provided.'}
+              </div>
+            </div>
+
+            {/* Right: Details */}
+            <div className="space-y-2 text-sm">
+              <div><span className="text-muted-foreground">Tag:</span> {viewAnimal?.tagNumber || '-'}</div>
+              <div><span className="text-muted-foreground">Breed:</span> {viewAnimal?.breed || '-'}</div>
+              <div>
+                <span className="text-muted-foreground">Gender:</span>{' '}
+                {viewAnimal
+                  ? viewAnimal.gender === 'MALE'
+                    ? 'Male'
+                    : viewAnimal.gender === 'FEMALE'
+                      ? 'Female'
+                      : viewAnimal.gender === 'CASTRATED'
+                        ? 'Castrated'
+                        : 'Unknown'
+                  : '-'}
+              </div>
+              <div>
+                <span className="text-muted-foreground">Age:</span>{' '}
+                {viewAnimal?.age && viewAnimal.age > 0 ? `${viewAnimal.age} yrs` : '-'}
+              </div>
+              <div><span className="text-muted-foreground">Type:</span> {viewAnimal?.type?.name || '-'}</div>
+              <div>
+                <span className="text-muted-foreground">DOB:</span>{' '}
+                {viewAnimal?.dateOfBirth ? new Date(viewAnimal.dateOfBirth).toLocaleDateString() : '-'}
+              </div>
+              <div>
+                <span className="text-muted-foreground">Weight:</span>{' '}
+                {viewAnimal?.weight ? `${viewAnimal.weight} kg` : '-'}
+              </div>
+              <div>
+                <span className="text-muted-foreground">Height:</span>{' '}
+                {viewAnimal?.height ? `${viewAnimal.height} cm` : '-'}
+              </div>
+              <div>
+                <span className="text-muted-foreground">Acquired:</span>{' '}
+                {viewAnimal?.acquisitionDate ? new Date(viewAnimal.acquisitionDate).toLocaleDateString() : '-'}{' '}
+                {viewAnimal?.acquisitionLocation ? `(${viewAnimal.acquisitionLocation})` : ''}
+              </div>
+              <div>
+                <span className="text-muted-foreground">Exit:</span>{' '}
+                {viewAnimal?.exitDate ? new Date(viewAnimal.exitDate).toLocaleDateString() : '-'}{' '}
+                {viewAnimal?.exitReason ? `(${viewAnimal.exitReason})` : ''}
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setViewOpen(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <Table>
         <TableHeader>
           <TableRow>
@@ -523,6 +603,17 @@ export const Animals = forwardRef<AnimalsHandles>((_, ref) => {
               <TableCell>{animal.dateOfBirth ? new Date(animal.dateOfBirth).toLocaleDateString() : '-'}</TableCell>
               <TableCell>{animal.weight ? `${animal.weight}kg` : '-'}</TableCell>
               <TableCell>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="mr-2"
+                  onClick={() => {
+                    setViewAnimal(animal)
+                    setViewOpen(true)
+                  }}
+                >
+                  View
+                </Button>
                 <Button variant="outline" size="sm" onClick={() => {
                   handleEdit(animal)
                   setDrawerOpen(true)
