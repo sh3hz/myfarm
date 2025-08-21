@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import type { Animal } from '../../../main/database'
+import type { Animal, Gender } from '../../../main/database'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
 import {
@@ -34,6 +34,15 @@ import { PawPrint } from 'lucide-react'
 interface AnimalFormData extends Omit<Animal, 'id' | 'created_at' | 'updated_at' | 'type'> {
   type_id: number
   image?: string
+  tagNumber?: string
+  gender: Gender
+  dateOfBirth?: string
+  weight?: number
+  height?: number
+  acquisitionDate?: string
+  acquisitionLocation?: string
+  exitDate?: string
+  exitReason?: string
 }
 
 const defaultAnimal: AnimalFormData = {
@@ -41,7 +50,16 @@ const defaultAnimal: AnimalFormData = {
   age: 0,
   type_id: 0,
   description: '',
-  image: ''
+  image: '',
+  gender: 'UNKNOWN',
+  tagNumber: '',
+  dateOfBirth: '',
+  weight: undefined,
+  height: undefined,
+  acquisitionDate: '',
+  acquisitionLocation: '',
+  exitDate: '',
+  exitReason: ''
 }
 
 export function Animals(): React.ReactElement {
@@ -122,11 +140,20 @@ export function Animals(): React.ReactElement {
     setSelectedAnimal(animal)
     setFormData({
       name: animal.name,
-      breed: animal.breed,
+      breed: animal.breed || '',
       age: animal.age,
       type_id: animal.type_id,
       description: animal.description,
-      image: animal.image
+      image: animal.image,
+      gender: animal.gender,
+      tagNumber: animal.tagNumber || '',
+      dateOfBirth: animal.dateOfBirth || '',
+      weight: animal.weight,
+      height: animal.height,
+      acquisitionDate: animal.acquisitionDate || '',
+      acquisitionLocation: animal.acquisitionLocation || '',
+      exitDate: animal.exitDate || '',
+      exitReason: animal.exitReason || ''
     })
   }
 
@@ -143,7 +170,7 @@ export function Animals(): React.ReactElement {
               Add Animal
             </Button>
           </SheetTrigger>
-          <SheetContent>
+          <SheetContent className="max-h-[100dvh] overflow-y-auto w-full sm:max-w-lg">
             <SheetHeader>
               <SheetTitle>{selectedAnimal ? 'Edit Animal' : 'Add New Animal'}</SheetTitle>
               <SheetDescription>
@@ -206,6 +233,130 @@ export function Animals(): React.ReactElement {
                   onChange={handleInputChange}
                 />
               </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="tagNumber">Tag Number</Label>
+                  <Input
+                    id="tagNumber"
+                    name="tagNumber"
+                    value={formData.tagNumber}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="gender">Gender</Label>
+                  <select
+                    id="gender"
+                    name="gender"
+                    value={formData.gender}
+                    onChange={handleInputChange}
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <option value="MALE">Male</option>
+                    <option value="FEMALE">Female</option>
+                    <option value="CASTRATED">Castrated</option>
+                    <option value="UNKNOWN">Unknown</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="dateOfBirth">Date of Birth</Label>
+                  <Input
+                    id="dateOfBirth"
+                    name="dateOfBirth"
+                    type="date"
+                    value={formData.dateOfBirth}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="weight">Weight (kg)</Label>
+                  <Input
+                    id="weight"
+                    name="weight"
+                    type="number"
+                    step="0.1"
+                    value={formData.weight || ''}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="height">Height (cm)</Label>
+                  <Input
+                    id="height"
+                    name="height"
+                    type="number"
+                    step="0.1"
+                    value={formData.height || ''}
+                    onChange={handleInputChange}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Acquisition</Label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="acquisitionDate">Date</Label>
+                    <Input
+                      id="acquisitionDate"
+                      name="acquisitionDate"
+                      type="date"
+                      value={formData.acquisitionDate}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="acquisitionLocation">Location</Label>
+                    <Input
+                      id="acquisitionLocation"
+                      name="acquisitionLocation"
+                      value={formData.acquisitionLocation}
+                      onChange={handleInputChange}
+                      placeholder="Where was the animal acquired?"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Exit Information</Label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="exitDate">Exit Date</Label>
+                    <Input
+                      id="exitDate"
+                      name="exitDate"
+                      type="date"
+                      value={formData.exitDate}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="exitReason">Reason</Label>
+                    <select
+                      id="exitReason"
+                      name="exitReason"
+                      value={formData.exitReason || ''}
+                      onChange={handleInputChange}
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <option value="">N/A</option>
+                      <option value="ADOPTED">Adopted</option>
+                      <option value="RELEASED">Released</option>
+                      <option value="DECEASED">Deceased</option>
+                      <option value="TRANSFERRED">Transferred</option>
+                      <option value="OTHER">Other</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
               <div className="space-y-2">
                 <Label htmlFor="image">Image</Label>
                 <div className="flex items-center space-x-2">
@@ -266,11 +417,14 @@ export function Animals(): React.ReactElement {
         <TableHeader>
           <TableRow>
             <TableHead>Image</TableHead>
+            <TableHead>ID</TableHead>
             <TableHead>Name</TableHead>
             <TableHead>Breed</TableHead>
+            <TableHead>Gender</TableHead>
             <TableHead>Age</TableHead>
             <TableHead>Type</TableHead>
-            <TableHead>Description</TableHead>
+            <TableHead>DOB</TableHead>
+            <TableHead>Weight (kg)</TableHead>
             <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -290,11 +444,18 @@ export function Animals(): React.ReactElement {
                   )}
                 </div>
               </TableCell>
-              <TableCell>{animal.name}</TableCell>
-              <TableCell>{animal.breed}</TableCell>
-              <TableCell>{animal.age}</TableCell>
+              <TableCell className="font-mono text-xs">{animal.tagNumber || `#${animal.id}`}</TableCell>
+              <TableCell className="font-medium">{animal.name}</TableCell>
+              <TableCell>{animal.breed || '-'}</TableCell>
+              <TableCell>
+                {animal.gender === 'MALE' ? '♂' : 
+                 animal.gender === 'FEMALE' ? '♀' :
+                 animal.gender === 'CASTRATED' ? '♂ (N)' : '?'}
+              </TableCell>
+              <TableCell>{animal.age} yrs</TableCell>
               <TableCell>{animal.type?.name}</TableCell>
-              <TableCell>{animal.description}</TableCell>
+              <TableCell>{animal.dateOfBirth ? new Date(animal.dateOfBirth).toLocaleDateString() : '-'}</TableCell>
+              <TableCell>{animal.weight ? `${animal.weight}kg` : '-'}</TableCell>
               <TableCell>
                 <div className="space-x-2">
                   <Sheet>
@@ -303,7 +464,7 @@ export function Animals(): React.ReactElement {
                         Edit
                       </Button>
                     </SheetTrigger>
-                    <SheetContent>
+                    <SheetContent className="max-h-[100dvh] overflow-y-auto w-full sm:max-w-lg">
                       <SheetHeader>
                         <SheetTitle>Edit Animal</SheetTitle>
                         <SheetDescription>
@@ -343,7 +504,6 @@ export function Animals(): React.ReactElement {
                             name="breed"
                             value={formData.breed}
                             onChange={handleInputChange}
-                            required
                           />
                         </div>
                         <div className="space-y-2">
@@ -381,6 +541,123 @@ export function Animals(): React.ReactElement {
                             value={formData.description}
                             onChange={handleInputChange}
                           />
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="edit-tagNumber">Tag Number</Label>
+                            <Input
+                              id="edit-tagNumber"
+                              name="tagNumber"
+                              value={formData.tagNumber}
+                              onChange={handleInputChange}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="edit-gender">Gender</Label>
+                            <select
+                              id="edit-gender"
+                              name="gender"
+                              value={formData.gender}
+                              onChange={handleInputChange}
+                              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                              <option value="MALE">Male</option>
+                              <option value="FEMALE">Female</option>
+                              <option value="CASTRATED">Castrated</option>
+                              <option value="UNKNOWN">Unknown</option>
+                            </select>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="edit-dateOfBirth">Date of Birth</Label>
+                            <Input
+                              id="edit-dateOfBirth"
+                              name="dateOfBirth"
+                              type="date"
+                              value={formData.dateOfBirth}
+                              onChange={handleInputChange}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="edit-weight">Weight (kg)</Label>
+                            <Input
+                              id="edit-weight"
+                              name="weight"
+                              type="number"
+                              step="0.1"
+                              value={formData.weight || ''}
+                              onChange={handleInputChange}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="edit-height">Height (cm)</Label>
+                            <Input
+                              id="edit-height"
+                              name="height"
+                              type="number"
+                              step="0.1"
+                              value={formData.height || ''}
+                              onChange={handleInputChange}
+                            />
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Acquisition</Label>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="edit-acquisitionDate">Date</Label>
+                              <Input
+                                id="edit-acquisitionDate"
+                                name="acquisitionDate"
+                                type="date"
+                                value={formData.acquisitionDate}
+                                onChange={handleInputChange}
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="edit-acquisitionLocation">Location</Label>
+                              <Input
+                                id="edit-acquisitionLocation"
+                                name="acquisitionLocation"
+                                value={formData.acquisitionLocation}
+                                onChange={handleInputChange}
+                                placeholder="Where was the animal acquired?"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Exit Information</Label>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="edit-exitDate">Exit Date</Label>
+                              <Input
+                                id="edit-exitDate"
+                                name="exitDate"
+                                type="date"
+                                value={formData.exitDate}
+                                onChange={handleInputChange}
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="edit-exitReason">Reason</Label>
+                              <select
+                                id="edit-exitReason"
+                                name="exitReason"
+                                value={formData.exitReason || ''}
+                                onChange={handleInputChange}
+                                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                              >
+                                <option value="">N/A</option>
+                                <option value="ADOPTED">Adopted</option>
+                                <option value="RELEASED">Released</option>
+                                <option value="DECEASED">Deceased</option>
+                                <option value="TRANSFERRED">Transferred</option>
+                                <option value="OTHER">Other</option>
+                              </select>
+                            </div>
+                          </div>
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="edit-image">Replace Image</Label>

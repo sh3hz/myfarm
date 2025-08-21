@@ -17,10 +17,21 @@ export interface AnimalType {
   updated_at: string;
 }
 
+export type Gender = 'MALE' | 'FEMALE' | 'CASTRATED' | 'UNKNOWN';
+
 export interface Animal {
   id: number;
+  tagNumber?: string;
   name: string;
   breed?: string;
+  gender: Gender;
+  dateOfBirth?: string;
+  weight?: number;
+  height?: number;
+  acquisitionDate?: string;
+  acquisitionLocation?: string;
+  exitDate?: string;
+  exitReason?: string;
   age: number;
   type_id: number;
   description: string;
@@ -51,19 +62,28 @@ class DatabaseService {
       )
     `);
 
-        // Create animals table if it doesn't exist
+    // Create animals table if it doesn't exist
     this.db.exec(`
       CREATE TABLE IF NOT EXISTS animals (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        tag_number TEXT,
         name TEXT NOT NULL,
         breed TEXT,
-        age INTEGER,
+        gender TEXT NOT NULL DEFAULT 'UNKNOWN' CHECK(gender IN ('MALE', 'FEMALE', 'CASTRATED', 'UNKNOWN')),
+        date_of_birth TEXT,
+        weight REAL,
+        height REAL,
+        acquisition_date TEXT,
+        acquisition_location TEXT,
+        exit_date TEXT,
+        exit_reason TEXT,
+        age INTEGER NOT NULL,
         type_id INTEGER NOT NULL,
-        description TEXT,
+        description TEXT NOT NULL,
         image TEXT,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (type_id) REFERENCES animal_types(id)
+        FOREIGN KEY (type_id) REFERENCES animal_types(id) ON DELETE CASCADE
       )
     `);
 
@@ -149,95 +169,156 @@ class DatabaseService {
   }
 
   // Animals CRUD operations
-  getAllAnimals(): Animal[] {
-    return this.db.prepare(`
-      SELECT animals.*, animal_types.name as type_name, animal_types.description as type_description
-      FROM animals
-      LEFT JOIN animal_types ON animals.type_id = animal_types.id
-      ORDER BY animals.name
-    `).all().map((row: any) => ({
-      ...row,
-      type: row.type_name ? {
-        id: row.type_id,
-        name: row.type_name,
-        description: row.type_description
-      } : undefined
-    })) as Animal[];
+  async getAnimals(): Promise<Animal[]> {
+    try {
+      const animals = this.db.prepare(`
+        SELECT 
+          a.*, 
+          at.name as type_name, 
+          at.description as type_description
+        FROM animals a
+        LEFT JOIN animal_types at ON a.type_id = at.id
+      `).all();
+
+      return animals.map((animal: any) => ({
+        ...animal,
+        tagNumber: animal.tag_number,
+        dateOfBirth: animal.date_of_birth,
+        acquisitionDate: animal.acquisition_date,
+        acquisitionLocation: animal.acquisition_location,
+        exitDate: animal.exit_date,
+        exitReason: animal.exit_reason,
+        type: animal.type_name ? {
+          id: animal.type_id,
+          name: animal.type_name,
+          description: animal.type_description
+        } : undefined
+      }));
+    } catch (error) {
+      console.error('Database - Error getting animals:', error);
+      throw error;
+    }
   }
 
   getAnimalById(id: number): Animal | undefined {
     const animal = this.db.prepare(`
-      SELECT animals.*, animal_types.name as type_name, animal_types.description as type_description
-      FROM animals
-      LEFT JOIN animal_types ON animals.type_id = animal_types.id
-      WHERE animals.id = ?
-    `).get(id);
+      SELECT 
+        a.*, 
+        at.name as type_name, 
+        at.description as type_description
+      FROM animals a
+      LEFT JOIN animal_types at ON a.type_id = at.id
+      WHERE a.id = ?
+    `).get(id) as any;
 
     if (!animal) return undefined;
 
-    // Type assertion for the database result
-    const dbAnimal = animal as {
-      id: number;
-      name: string;
-      breed: string;
-      age: number;
-      type_id: number;
-      description: string;
-      image: string;
-      type_name: string | null;
-      type_description: string | null;
-    };
-
-    const result: Animal = {
-      id: dbAnimal.id,
-      name: dbAnimal.name,
-      breed: dbAnimal.breed,
-      age: dbAnimal.age,
-      type_id: dbAnimal.type_id,
-      description: dbAnimal.description,
-      image: dbAnimal.image,
-      created_at: (animal as any).created_at,
-      updated_at: (animal as any).updated_at,
-      type: dbAnimal.type_name ? {
-        id: dbAnimal.type_id,
-        name: dbAnimal.type_name,
-        description: dbAnimal.type_description || '',
-        created_at: (animal as any).created_at,
-        updated_at: (animal as any).updated_at
+    return {
+      id: animal.id,
+      name: animal.name,
+      breed: animal.breed,
+      age: animal.age,
+      type_id: animal.type_id,
+      description: animal.description,
+      image: animal.image,
+      gender: animal.gender as Gender,
+      tagNumber: animal.tag_number,
+      dateOfBirth: animal.date_of_birth,
+      weight: animal.weight,
+      height: animal.height,
+      acquisitionDate: animal.acquisition_date,
+      acquisitionLocation: animal.acquisition_location,
+      exitDate: animal.exit_date,
+      exitReason: animal.exit_reason,
+      created_at: animal.created_at,
+      updated_at: animal.updated_at,
+      type: animal.type_name ? {
+        id: animal.type_id,
+        name: animal.type_name,
+        description: animal.type_description,
+        created_at: animal.created_at,
+        updated_at: animal.updated_at
       } : undefined
     };
-    return result;
   }
 
-  createAnimal(data: Omit<Animal, 'id' | 'created_at' | 'updated_at'>): Animal {
-    const result = this.db.prepare(
-      'INSERT INTO animals (name, breed, age, type_id, description, image) VALUES (?, ?, ?, ?, ?, ?) RETURNING *'
-    ).get(data.name, data.breed, data.age, data.type_id, data.description, data.image) as Animal;
-    return this.getAnimalById(result.id)!;
+  async createAnimal(animal: Omit<Animal, 'id' | 'created_at' | 'updated_at'>): Promise<void> {
+    try {
+      const now = new Date().toISOString();
+      const stmt = this.db.prepare(`
+        INSERT INTO animals (
+          name, breed, age, type_id, description, image, 
+          created_at, updated_at, tag_number, gender, 
+          date_of_birth, weight, height, acquisition_date, 
+          acquisition_location, exit_date, exit_reason
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `);
+      
+      stmt.run(
+        animal.name,
+        animal.breed,
+        animal.age,
+        animal.type_id,
+        animal.description,
+        animal.image,
+        now,
+        now,
+        animal.tagNumber,
+        animal.gender,
+        animal.dateOfBirth,
+        animal.weight,
+        animal.height,
+        animal.acquisitionDate,
+        animal.acquisitionLocation,
+        animal.exitDate,
+        animal.exitReason
+      );
+    } catch (error) {
+      console.error('Database - Error creating animal:', error);
+      throw error;
+    }
   }
 
-  updateAnimal(id: number, data: Partial<Omit<Animal, 'id' | 'created_at' | 'updated_at'>>): Animal | undefined {
-    const now = new Date().toISOString();
-    const current = this.getAnimalById(id);
-    if (!current) return undefined;
+  async updateAnimal(id: number, data: Partial<Omit<Animal, 'id' | 'created_at' | 'updated_at'>>): Promise<Animal | undefined> {
+    try {
+      const now = new Date().toISOString();
+      const current = this.getAnimalById(id);
+      if (!current) return undefined;
 
-    const result = this.db.prepare(`
-      UPDATE animals
-      SET name = ?, breed = ?, age = ?, type_id = ?, description = ?, image = ?, updated_at = ?
-      WHERE id = ?
-      RETURNING *
-    `).get(
-      data.name ?? current.name,
-      data.breed ?? current.breed,
-      data.age ?? current.age,
-      data.type_id ?? current.type_id,
-      data.description ?? current.description,
-      data.image ?? current.image,
-      now,
-      id
-    ) as Animal | undefined;
+      const result = this.db.prepare(`
+        UPDATE animals
+        SET name = ?, breed = ?, age = ?, type_id = ?, description = ?, image = ?, 
+        tag_number = ?, gender = ?, date_of_birth = ?, weight = ?, height = ?, 
+        acquisition_date = ?, acquisition_location = ?, exit_date = ?, exit_reason = ?, 
+        updated_at = ?
+        WHERE id = ?
+        RETURNING *
+      `).get(
+        data.name ?? current.name,
+        data.breed ?? current.breed,
+        data.age ?? current.age,
+        data.type_id ?? current.type_id,
+        data.description ?? current.description,
+        data.image ?? current.image,
+        data.tagNumber ?? current.tagNumber,
+        data.gender ?? current.gender,
+        data.dateOfBirth ?? current.dateOfBirth,
+        data.weight ?? current.weight,
+        data.height ?? current.height,
+        data.acquisitionDate ?? current.acquisitionDate,
+        data.acquisitionLocation ?? current.acquisitionLocation,
+        data.exitDate ?? current.exitDate,
+        data.exitReason ?? current.exitReason,
+        now,
+        id
+      ) as Animal | undefined;
 
-    return result ? this.getAnimalById(result.id) : undefined;
+      return result ? this.getAnimalById(result.id) : undefined;
+    } catch (error) {
+      console.error('Database - Error updating animal:', error);
+      throw error;
+    }
   }
 
   deleteAnimal(id: number): void {

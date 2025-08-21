@@ -5,7 +5,7 @@ import type { Animal } from '../database'
 // Register IPC handlers for animals
 export function registerAnimalHandlers() {
   ipcMain.handle('get-animals', async () => {
-    return databaseService.getAllAnimals()
+    return databaseService.getAnimals()
   })
 
   ipcMain.handle('get-animal', async (_, id: number) => {
