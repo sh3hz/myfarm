@@ -12,6 +12,16 @@ import {
   DialogTrigger,
 } from './ui/dialog'
 import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+  DrawerClose,
+} from './ui/drawer'
+import {
   Table,
   TableBody,
   TableCell,
@@ -19,14 +29,6 @@ import {
   TableHeader,
   TableRow,
 } from './ui/table'
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from './ui/sheet'
 import { Label } from './ui/label'
 import { toast } from 'sonner'
 import { PawPrint } from 'lucide-react'
@@ -68,6 +70,7 @@ export function Animals(): React.ReactElement {
   const [selectedAnimal, setSelectedAnimal] = useState<Animal | null>(null)
   const [formData, setFormData] = useState<AnimalFormData>(defaultAnimal)
   const [imagePaths, setImagePaths] = useState<Record<string, string>>({})
+  const [drawerOpen, setDrawerOpen] = useState(false)
 
   const loadAnimals = async (): Promise<void> => {
     const fetchedAnimals = await window.api.getAnimals()
@@ -98,6 +101,12 @@ export function Animals(): React.ReactElement {
     loadImages()
   }, [animals])
 
+  useEffect(() => {
+    if (drawerOpen && !selectedAnimal) {
+      setFormData(defaultAnimal)
+    }
+  }, [drawerOpen, selectedAnimal])
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>): void => {
     const { name, value } = e.target
     setFormData(prev => ({
@@ -118,6 +127,7 @@ export function Animals(): React.ReactElement {
       }
       setSelectedAnimal(null)
       setFormData(defaultAnimal)
+      setDrawerOpen(false)
       loadAnimals()
     } catch (error) {
       toast.error('Error saving animal')
@@ -129,6 +139,7 @@ export function Animals(): React.ReactElement {
     try {
       await window.api.deleteAnimal(id)
       toast.success('Animal deleted successfully')
+      setDrawerOpen(false)
       loadAnimals()
     } catch (error) {
       toast.error('Error deleting animal')
@@ -161,260 +172,297 @@ export function Animals(): React.ReactElement {
     <div className="container mx-auto p-4 space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Animals</h2>
-        <Sheet>
-          <SheetTrigger asChild>
+        <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
+          <DrawerTrigger asChild>
             <Button onClick={() => {
               setSelectedAnimal(null)
               setFormData(defaultAnimal)
+              setDrawerOpen(true)
             }}>
               Add Animal
             </Button>
-          </SheetTrigger>
-          <SheetContent className="max-h-[100dvh] overflow-y-auto w-full sm:max-w-lg">
-            <SheetHeader>
-              <SheetTitle>{selectedAnimal ? 'Edit Animal' : 'Add New Animal'}</SheetTitle>
-              <SheetDescription>
+          </DrawerTrigger>
+          <DrawerContent className="flex flex-col h-[100dvh] w-full">
+            <DrawerHeader>
+              <DrawerTitle>{selectedAnimal ? 'Edit Animal' : 'Add New Animal'}</DrawerTitle>
+              <DrawerDescription>
                 Fill in the details for the animal
-              </SheetDescription>
-            </SheetHeader>
-            <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Name</Label>
-                <Input
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="breed">Breed</Label>
-                <Input
-                  id="breed"
-                  name="breed"
-                  value={formData.breed}
-                  onChange={handleInputChange}
-                />
-              </div>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="age">Age</Label>
-                <Input
-                  id="age"
-                  name="age"
-                  type="number"
-                  value={formData.age}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="type_id">Animal Type</Label>
-                <select
-                  id="type_id"
-                  name="type_id"
-                  value={formData.type_id}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full rounded-md border border-input bg-background px-3 py-2"
-                >
-                  <option value="">Select a type</option>
-                  {animalTypes.map(type => (
-                    <option key={type.id} value={type.id}>{type.name}</option>
-                  ))}
-                </select>
-              </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
-                <Input
-                  id="description"
-                  name="description"
-                  value={formData.description}
-                  onChange={handleInputChange}
-                />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="tagNumber">Tag Number</Label>
-                  <Input
-                    id="tagNumber"
-                    name="tagNumber"
-                    value={formData.tagNumber}
-                    onChange={handleInputChange}
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="gender">Gender</Label>
-                  <select
-                    id="gender"
-                    name="gender"
-                    value={formData.gender}
-                    onChange={handleInputChange}
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    <option value="MALE">Male</option>
-                    <option value="FEMALE">Female</option>
-                    <option value="CASTRATED">Castrated</option>
-                    <option value="UNKNOWN">Unknown</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="dateOfBirth">Date of Birth</Label>
-                  <Input
-                    id="dateOfBirth"
-                    name="dateOfBirth"
-                    type="date"
-                    value={formData.dateOfBirth}
-                    onChange={handleInputChange}
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="weight">Weight (kg)</Label>
-                  <Input
-                    id="weight"
-                    name="weight"
-                    type="number"
-                    step="0.1"
-                    value={formData.weight || ''}
-                    onChange={handleInputChange}
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="height">Height (cm)</Label>
-                  <Input
-                    id="height"
-                    name="height"
-                    type="number"
-                    step="0.1"
-                    value={formData.height || ''}
-                    onChange={handleInputChange}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Acquisition</Label>
+              </DrawerDescription>
+            </DrawerHeader>
+            <div className="flex-1 overflow-y-auto px-4">
+              <form onSubmit={handleSubmit} className="space-y-4 mt-4" id="animal-form">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="acquisitionDate">Date</Label>
+                    <Label htmlFor="name">Name</Label>
                     <Input
-                      id="acquisitionDate"
-                      name="acquisitionDate"
-                      type="date"
-                      value={formData.acquisitionDate}
+                      id="name"
+                      name="name"
+                      value={formData.name}
                       onChange={handleInputChange}
+                      required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="acquisitionLocation">Location</Label>
+                    <Label htmlFor="breed">Breed</Label>
                     <Input
-                      id="acquisitionLocation"
-                      name="acquisitionLocation"
-                      value={formData.acquisitionLocation}
+                      id="breed"
+                      name="breed"
+                      value={formData.breed}
                       onChange={handleInputChange}
-                      placeholder="Where was the animal acquired?"
                     />
                   </div>
                 </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Exit Information</Label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="exitDate">Exit Date</Label>
+                    <Label htmlFor="age">Age</Label>
                     <Input
-                      id="exitDate"
-                      name="exitDate"
-                      type="date"
-                      value={formData.exitDate}
+                      id="age"
+                      name="age"
+                      type="number"
+                      value={formData.age}
                       onChange={handleInputChange}
+                      required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="exitReason">Reason</Label>
+                    <Label htmlFor="type_id">Animal Type</Label>
                     <select
-                      id="exitReason"
-                      name="exitReason"
-                      value={formData.exitReason || ''}
+                      id="type_id"
+                      name="type_id"
+                      value={formData.type_id}
                       onChange={handleInputChange}
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      required
+                      className="w-full rounded-md border border-input bg-background px-3 py-2"
                     >
-                      <option value="">N/A</option>
-                      <option value="ADOPTED">Adopted</option>
-                      <option value="RELEASED">Released</option>
-                      <option value="DECEASED">Deceased</option>
-                      <option value="TRANSFERRED">Transferred</option>
-                      <option value="OTHER">Other</option>
+                      <option value="">Select a type</option>
+                      {animalTypes.map(type => (
+                        <option key={type.id} value={type.id}>{type.name}</option>
+                      ))}
                     </select>
                   </div>
                 </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="image">Image</Label>
-                <div className="flex items-center space-x-2">
-                  <div className="relative w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-                    {formData.image && imagePaths[formData.image] ? (
-                      <img
-                        src={imagePaths[formData.image]}
-                        alt="Preview"
-                        className="object-cover w-full h-full"
-                      />
-                    ) : (
-                      <PawPrint className="w-5 h-5 text-muted-foreground" />
-                    )}
-                  </div>
+                <div className="space-y-2">
+                  <Label htmlFor="description">Description</Label>
                   <Input
-                    id="image"
-                    name="image"
-                    type="file"
-                    accept="image/*"
-                    className="flex-1"
-                    onChange={async (e) => {
-                      const file = e.target.files?.[0]
-                      if (file) {
-                        try {
-                          const reader = new FileReader()
-                          reader.onload = async (e) => {
-                            const imageData = e.target?.result as string
-                            const savedPath = await window.api.saveImage(imageData)
-                            const fullPath = await window.api.getImagePath(savedPath)
-                            setImagePaths(prev => ({
-                              ...prev,
-                              [savedPath]: fullPath
-                            }))
-                            setFormData(prev => ({
-                              ...prev,
-                              image: savedPath
-                            }))
-                          }
-                          reader.readAsDataURL(file)
-                        } catch (error) {
-                          toast.error('Error uploading image')
-                          console.error('Error uploading image:', error)
-                        }
-                      }
-                    }}
+                    id="description"
+                    name="description"
+                    value={formData.description}
+                    onChange={handleInputChange}
                   />
                 </div>
-              </div>
-              <Button type="submit" className="w-full">
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="tagNumber">Tag Number</Label>
+                    <Input
+                      id="tagNumber"
+                      name="tagNumber"
+                      value={formData.tagNumber}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="gender">Gender</Label>
+                    <select
+                      id="gender"
+                      name="gender"
+                      value={formData.gender}
+                      onChange={handleInputChange}
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <option value="MALE">Male</option>
+                      <option value="FEMALE">Female</option>
+                      <option value="CASTRATED">Castrated</option>
+                      <option value="UNKNOWN">Unknown</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="dateOfBirth">Date of Birth</Label>
+                    <Input
+                      id="dateOfBirth"
+                      name="dateOfBirth"
+                      type="date"
+                      value={formData.dateOfBirth}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="weight">Weight (kg)</Label>
+                    <Input
+                      id="weight"
+                      name="weight"
+                      type="number"
+                      step="0.1"
+                      value={formData.weight || ''}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="height">Height (cm)</Label>
+                    <Input
+                      id="height"
+                      name="height"
+                      type="number"
+                      step="0.1"
+                      value={formData.height || ''}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Acquisition</Label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="acquisitionDate">Date</Label>
+                      <Input
+                        id="acquisitionDate"
+                        name="acquisitionDate"
+                        type="date"
+                        value={formData.acquisitionDate}
+                        onChange={handleInputChange}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="acquisitionLocation">Location</Label>
+                      <Input
+                        id="acquisitionLocation"
+                        name="acquisitionLocation"
+                        value={formData.acquisitionLocation}
+                        onChange={handleInputChange}
+                        placeholder="Where was the animal acquired?"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Exit Information</Label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="exitDate">Exit Date</Label>
+                      <Input
+                        id="exitDate"
+                        name="exitDate"
+                        type="date"
+                        value={formData.exitDate}
+                        onChange={handleInputChange}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="exitReason">Reason</Label>
+                      <select
+                        id="exitReason"
+                        name="exitReason"
+                        value={formData.exitReason || ''}
+                        onChange={handleInputChange}
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        <option value="">N/A</option>
+                        <option value="ADOPTED">Adopted</option>
+                        <option value="RELEASED">Released</option>
+                        <option value="DECEASED">Deceased</option>
+                        <option value="TRANSFERRED">Transferred</option>
+                        <option value="OTHER">Other</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="image">Image</Label>
+                  <div className="flex items-center space-x-2">
+                    <div className="relative w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                      {formData.image && imagePaths[formData.image] ? (
+                        <img
+                          src={imagePaths[formData.image]}
+                          alt="Preview"
+                          className="object-cover w-full h-full"
+                        />
+                      ) : (
+                        <PawPrint className="w-5 h-5 text-muted-foreground" />
+                      )}
+                    </div>
+                    <Input
+                      id="image"
+                      name="image"
+                      type="file"
+                      accept="image/*"
+                      className="flex-1"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0]
+                        if (file) {
+                          try {
+                            const reader = new FileReader()
+                            reader.onload = async (e) => {
+                              const imageData = e.target?.result as string
+                              const savedPath = await window.api.saveImage(imageData)
+                              const fullPath = await window.api.getImagePath(savedPath)
+                              setImagePaths(prev => ({
+                                ...prev,
+                                [savedPath]: fullPath
+                              }))
+                              setFormData(prev => ({
+                                ...prev,
+                                image: savedPath
+                              }))
+                            }
+                            reader.readAsDataURL(file)
+                          } catch (error) {
+                            toast.error('Error uploading image')
+                            console.error('Error uploading image:', error)
+                          }
+                        }
+                      }}
+                    />
+                  </div>
+                </div>
+              </form>
+            </div>
+            <DrawerFooter className="flex flex-row gap-2 pt-4">
+              <Button type="submit" form="animal-form" className="flex-1">
                 {selectedAnimal ? 'Update' : 'Create'} Animal
               </Button>
-            </form>
-          </SheetContent>
-        </Sheet>
+              {selectedAnimal && (
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button variant="destructive" type="button" className="flex-1">
+                      Delete
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Are you sure you want to delete this animal?</DialogTitle>
+                      <DialogDescription>
+                        This action cannot be undone. This will permanently delete {formData.name}.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                      <Button variant="outline" type="button">
+                        Cancel
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        type="button"
+                        onClick={() => handleDelete(selectedAnimal.id)}
+                      >
+                        Delete
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              )}
+              <DrawerClose asChild>
+                <Button type="button" variant="outline" className="flex-1">Cancel</Button>
+              </DrawerClose>
+            </DrawerFooter>
+          </DrawerContent>
+        </Drawer>
       </div>
 
       <Table>
@@ -461,283 +509,12 @@ export function Animals(): React.ReactElement {
               <TableCell>{animal.dateOfBirth ? new Date(animal.dateOfBirth).toLocaleDateString() : '-'}</TableCell>
               <TableCell>{animal.weight ? `${animal.weight}kg` : '-'}</TableCell>
               <TableCell>
-                <div className="space-x-2">
-                  <Sheet>
-                    <SheetTrigger asChild>
-                      <Button variant="outline" size="sm" onClick={() => handleEdit(animal)}>
-                        Edit
-                      </Button>
-                    </SheetTrigger>
-                    <SheetContent className="max-h-[100dvh] overflow-y-auto w-full sm:max-w-lg">
-                      <SheetHeader>
-                        <SheetTitle>Edit Animal</SheetTitle>
-                        <SheetDescription>
-                          Edit the details for {animal.name}
-                        </SheetDescription>
-                      </SheetHeader>
-                      <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-                        {formData.image && (
-                          <div className="flex justify-center mb-4">
-                            <div className="relative w-32 h-32 rounded-full bg-muted flex items-center justify-center">
-                              {formData.image && imagePaths[formData.image] ? (
-                                <img
-                                  src={imagePaths[formData.image]}
-                                  alt="Current"
-                                  className="object-cover w-full h-full"
-                                />
-                              ) : (
-                                <PawPrint className="w-16 h-16 text-muted-foreground" />
-                              )}
-                            </div>
-                          </div>
-                        )}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="edit-name">Name</Label>
-                          <Input
-                            id="edit-name"
-                            name="name"
-                            value={formData.name}
-                            onChange={handleInputChange}
-                            required
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="edit-breed">Breed</Label>
-                          <Input
-                            id="edit-breed"
-                            name="breed"
-                            value={formData.breed}
-                            onChange={handleInputChange}
-                          />
-                        </div>
-                        </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="edit-age">Age</Label>
-                          <Input
-                            id="edit-age"
-                            name="age"
-                            type="number"
-                            value={formData.age}
-                            onChange={handleInputChange}
-                            required
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="edit-type_id">Animal Type</Label>
-                          <select
-                            id="edit-type_id"
-                            name="type_id"
-                            value={formData.type_id}
-                            onChange={handleInputChange}
-                            required
-                            className="w-full rounded-md border border-input bg-background px-3 py-2"
-                          >
-                            <option value="">Select a type</option>
-                            {animalTypes.map(type => (
-                              <option key={type.id} value={type.id}>{type.name}</option>
-                            ))}
-                          </select>
-                        </div>
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="edit-description">Description</Label>
-                          <Input
-                            id="edit-description"
-                            name="description"
-                            value={formData.description}
-                            onChange={handleInputChange}
-                          />
-                        </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="edit-tagNumber">Tag Number</Label>
-                            <Input
-                              id="edit-tagNumber"
-                              name="tagNumber"
-                              value={formData.tagNumber}
-                              onChange={handleInputChange}
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="edit-gender">Gender</Label>
-                            <select
-                              id="edit-gender"
-                              name="gender"
-                              value={formData.gender}
-                              onChange={handleInputChange}
-                              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                            >
-                              <option value="MALE">Male</option>
-                              <option value="FEMALE">Female</option>
-                              <option value="CASTRATED">Castrated</option>
-                              <option value="UNKNOWN">Unknown</option>
-                            </select>
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="edit-dateOfBirth">Date of Birth</Label>
-                            <Input
-                              id="edit-dateOfBirth"
-                              name="dateOfBirth"
-                              type="date"
-                              value={formData.dateOfBirth}
-                              onChange={handleInputChange}
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="edit-weight">Weight (kg)</Label>
-                            <Input
-                              id="edit-weight"
-                              name="weight"
-                              type="number"
-                              step="0.1"
-                              value={formData.weight || ''}
-                              onChange={handleInputChange}
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="edit-height">Height (cm)</Label>
-                            <Input
-                              id="edit-height"
-                              name="height"
-                              type="number"
-                              step="0.1"
-                              value={formData.height || ''}
-                              onChange={handleInputChange}
-                            />
-                          </div>
-                        </div>
-                        <div className="space-y-2">
-                          <Label>Acquisition</Label>
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                              <Label htmlFor="edit-acquisitionDate">Date</Label>
-                              <Input
-                                id="edit-acquisitionDate"
-                                name="acquisitionDate"
-                                type="date"
-                                value={formData.acquisitionDate}
-                                onChange={handleInputChange}
-                              />
-                            </div>
-                            <div className="space-y-2">
-                              <Label htmlFor="edit-acquisitionLocation">Location</Label>
-                              <Input
-                                id="edit-acquisitionLocation"
-                                name="acquisitionLocation"
-                                value={formData.acquisitionLocation}
-                                onChange={handleInputChange}
-                                placeholder="Where was the animal acquired?"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                        <div className="space-y-2">
-                          <Label>Exit Information</Label>
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                              <Label htmlFor="edit-exitDate">Exit Date</Label>
-                              <Input
-                                id="edit-exitDate"
-                                name="exitDate"
-                                type="date"
-                                value={formData.exitDate}
-                                onChange={handleInputChange}
-                              />
-                            </div>
-                            <div className="space-y-2">
-                              <Label htmlFor="edit-exitReason">Reason</Label>
-                              <select
-                                id="edit-exitReason"
-                                name="exitReason"
-                                value={formData.exitReason || ''}
-                                onChange={handleInputChange}
-                                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                              >
-                                <option value="">N/A</option>
-                                <option value="ADOPTED">Adopted</option>
-                                <option value="RELEASED">Released</option>
-                                <option value="DECEASED">Deceased</option>
-                                <option value="TRANSFERRED">Transferred</option>
-                                <option value="OTHER">Other</option>
-                              </select>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="edit-image">Replace Image</Label>
-                          <Input
-                            id="edit-image"
-                            name="image"
-                            type="file"
-                            accept="image/*"
-                            className="flex-1"
-                            onChange={async (e) => {
-                              const file = e.target.files?.[0]
-                              if (file) {
-                                try {
-                                  const reader = new FileReader()
-                                  reader.onload = async (e) => {
-                                    const imageData = e.target?.result as string
-                                    const savedPath = await window.api.saveImage(imageData)
-                                    const fullPath = await window.api.getImagePath(savedPath)
-                                    setImagePaths(prev => ({
-                                      ...prev,
-                                      [savedPath]: fullPath
-                                    }))
-                                    setFormData(prev => ({
-                                      ...prev,
-                                      image: savedPath
-                                    }))
-                                  }
-                                  reader.readAsDataURL(file)
-                                } catch (error) {
-                                  toast.error('Error uploading image')
-                                  console.error('Error uploading image:', error)
-                                }
-                              }
-                            }}
-                          />
-                        </div>
-                        <div className="flex gap-4 mt-4">
-                          <Button type="submit" className="flex-1">
-                            Update Animal
-                          </Button>
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <Button variant="destructive" type="button">
-                                Delete
-                              </Button>
-                            </DialogTrigger>
-                            <DialogContent>
-                              <DialogHeader>
-                                <DialogTitle>Are you sure you want to delete this animal?</DialogTitle>
-                                <DialogDescription>
-                                  This action cannot be undone. This will permanently delete {animal.name}.
-                                </DialogDescription>
-                              </DialogHeader>
-                              <DialogFooter>
-                                <Button variant="outline" type="button">
-                                  Cancel
-                                </Button>
-                                <Button
-                                  variant="destructive"
-                                  type="button"
-                                  onClick={() => handleDelete(animal.id)}
-                                >
-                                  Delete
-                                </Button>
-                              </DialogFooter>
-                            </DialogContent>
-                          </Dialog>
-                        </div>
-                      </form>
-                    </SheetContent>
-                  </Sheet>
-                </div>
+                <Button variant="outline" size="sm" onClick={() => {
+                  handleEdit(animal)
+                  setDrawerOpen(true)
+                }}>
+                  Edit
+                </Button>
               </TableCell>
             </TableRow>
           ))}
