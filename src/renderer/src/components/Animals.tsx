@@ -38,7 +38,6 @@ interface AnimalFormData extends Omit<Animal, 'id' | 'created_at' | 'updated_at'
 
 const defaultAnimal: AnimalFormData = {
   name: '',
-  breed: '',
   age: 0,
   type_id: 0,
   description: '',
@@ -169,7 +168,6 @@ export function Animals(): React.ReactElement {
                   name="breed"
                   value={formData.breed}
                   onChange={handleInputChange}
-                  required
                 />
               </div>
               <div className="space-y-2">

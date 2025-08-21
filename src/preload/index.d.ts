@@ -16,7 +16,7 @@ interface AnimalType {
 interface Animal {
   id: number
   name: string
-  breed: string
+  breed?: string
   age: number
   type_id: number
   description: string
