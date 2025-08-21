@@ -178,6 +178,7 @@ export function Animals(): React.ReactElement {
               </SheetDescription>
             </SheetHeader>
             <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="name">Name</Label>
                 <Input
@@ -197,6 +198,8 @@ export function Animals(): React.ReactElement {
                   onChange={handleInputChange}
                 />
               </div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="age">Age</Label>
                 <Input
@@ -223,6 +226,7 @@ export function Animals(): React.ReactElement {
                     <option key={type.id} value={type.id}>{type.name}</option>
                   ))}
                 </select>
+              </div>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="description">Description</Label>
@@ -487,6 +491,7 @@ export function Animals(): React.ReactElement {
                             </div>
                           </div>
                         )}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <Label htmlFor="edit-name">Name</Label>
                           <Input
@@ -506,6 +511,8 @@ export function Animals(): React.ReactElement {
                             onChange={handleInputChange}
                           />
                         </div>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <Label htmlFor="edit-age">Age</Label>
                           <Input
@@ -532,6 +539,7 @@ export function Animals(): React.ReactElement {
                               <option key={type.id} value={type.id}>{type.name}</option>
                             ))}
                           </select>
+                        </div>
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="edit-description">Description</Label>
