@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { ReactElement } from 'react'
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts'
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, LabelList } from 'recharts'
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card'
 import { ChartContainer, ChartDescription, ChartTitle } from './ui/chart'
 
@@ -9,17 +9,16 @@ interface TypeCount {
   count: number
 }
 
+// Shades of green to mimic shadcn chart palette
 const COLORS = [
-  '#3b82f6', // blue-500
+  '#14532d', // green-900
+  '#166534', // green-800
+  '#15803d', // green-700
+  '#16a34a', // green-600
   '#22c55e', // green-500
-  '#ef4444', // red-500
-  '#a855f7', // purple-500
-  '#f59e0b', // amber-500
-  '#06b6d4', // cyan-500
-  '#84cc16', // lime-500
-  '#f97316', // orange-500
-  '#10b981', // emerald-500
-  '#e11d48', // rose-600
+  '#4ade80', // green-400
+  '#86efac', // green-300
+  '#bbf7d0', // green-200
 ]
 
 export function AnimalTypePie(): ReactElement {
@@ -49,19 +48,21 @@ export function AnimalTypePie(): ReactElement {
   if (!data.length) return <div className="text-sm text-muted-foreground">No data</div>
 
   return (
-    <Card>
+    <div className="px-6">
+    <Card className="max-w-4xl mx-auto overflow-hidden">
       <CardHeader className="p-6 pb-2">
         <CardTitle className="text-sm font-medium">Animals by Type</CardTitle>
       </CardHeader>
-      <CardContent className="p-6 pt-0">
+      <CardContent className="p-6 pt-0 overflow-x-hidden">
         <ChartContainer>
           <ChartTitle>Distribution</ChartTitle>
           <ChartDescription>Total animals: {total}</ChartDescription>
           <div className="space-y-4">
-            <div className="h-64">
+            <div className="h-64 mx-auto aspect-square max-h-[250px] w-full [&_.recharts-text]:fill-background">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
-                  <Pie data={data} dataKey="count" nameKey="name" innerRadius={50} outerRadius={80} paddingAngle={2}>
+                  <Pie data={data} dataKey="count" nameKey="name" paddingAngle={2}>
+                    <LabelList dataKey="name" className="fill-background" stroke="none" fontSize={12} />
                     {data.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
@@ -78,7 +79,7 @@ export function AnimalTypePie(): ReactElement {
                   <div key={d.name} className="flex items-center justify-between text-sm">
                     <div className="flex items-center gap-2">
                       <span className="inline-block h-3 w-3 rounded-sm" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
-                      <span>{d.name}</span>
+                      <span className="break-words">{d.name}</span>
                     </div>
                     <div className="text-muted-foreground">
                       {d.count} ({pct}%)
@@ -91,5 +92,6 @@ export function AnimalTypePie(): ReactElement {
         </ChartContainer>
       </CardContent>
     </Card>
+    </div>
   )
 }
