@@ -373,6 +373,28 @@ class DatabaseService {
       mostCommonTypeCount: row?.mostCommonTypeCount ?? 0
     };
   }
+
+  // Get counts of animals by type
+  getAnimalTypeCounts(): Array<{ name: string; count: number }> {
+    try {
+      const rows = this.db
+        .prepare(
+          `
+          SELECT at.name AS name, COUNT(a.id) AS count
+          FROM animal_types at
+          LEFT JOIN animals a ON a.type_id = at.id
+          GROUP BY at.id, at.name
+          ORDER BY count DESC, at.name ASC
+        `
+        )
+        .all() as Array<{ name: string; count: number }>
+
+      return rows.map((r) => ({ name: r.name, count: Number(r.count) }))
+    } catch (error) {
+      console.error('Database - Error getting animal type counts:', error)
+      return []
+    }
+  }
 }
 
 

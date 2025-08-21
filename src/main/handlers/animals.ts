@@ -46,4 +46,11 @@ export function registerAnimalHandlers(): void {
       return databaseService.getAnimalStats()
     }
   )
+
+  ipcMain.handle(
+    'get-animal-type-counts',
+    async (): Promise<Array<{ name: string; count: number }>> => {
+      return databaseService.getAnimalTypeCounts()
+    }
+  )
 }

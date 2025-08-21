@@ -47,6 +47,7 @@ declare global {
         mostCommonType: string
         mostCommonTypeCount: number
       }>
+      getAnimalTypeCounts: () => Promise<Array<{ name: string; count: number }>>
     }
   }
 }

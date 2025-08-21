@@ -3,6 +3,7 @@ import { Navigation } from '@renderer/components/Navigation'
 import { AnimalTypes } from '@renderer/components/AnimalTypes'
 import { Animals } from '@renderer/components/Animals'
 import { SummaryCards } from '@renderer/components/SummaryCards'
+import { AnimalTypePie } from '@renderer/components/AnimalTypePie'
 
 function App(): React.JSX.Element {
   
@@ -53,9 +54,7 @@ function App(): React.JSX.Element {
             
             <SummaryCards />
             
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {/* Add more dashboard widgets here in the future */}
-            </div>
+            <AnimalTypePie />
           </div>
         )
       case '/animals':

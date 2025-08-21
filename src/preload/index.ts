@@ -24,7 +24,8 @@ const api = {
   getImagePath: (relativePath: string) => ipcRenderer.invoke('get-image-path', relativePath),
   
   // Statistics API
-  getAnimalStats: () => ipcRenderer.invoke('get-animal-stats')
+  getAnimalStats: () => ipcRenderer.invoke('get-animal-stats'),
+  getAnimalTypeCounts: () => ipcRenderer.invoke('get-animal-type-counts')
 }
 
 // Expose protected methods that allow the renderer process to use
