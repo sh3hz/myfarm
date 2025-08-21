@@ -18,6 +18,7 @@ const api = {
   createAnimal: (data) => ipcRenderer.invoke('create-animal', data),
   updateAnimal: (id: number, data) => ipcRenderer.invoke('update-animal', id, data),
   deleteAnimal: (id: number) => ipcRenderer.invoke('delete-animal', id),
+  exportAnimalsToExcel: () => ipcRenderer.invoke('export-animals-excel'),
 
   // File handling API
   saveImage: (imageData: string) => ipcRenderer.invoke('save-image', imageData),

@@ -63,7 +63,7 @@ export function AnimalTypePie(): ReactElement {
                 <PieChart>
                   <Pie data={data} dataKey="count" nameKey="name" paddingAngle={2}>
                     <LabelList dataKey="name" className="fill-background" stroke="none" fontSize={12} />
-                    {data.map((entry, index) => (
+                    {data.map((_, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>

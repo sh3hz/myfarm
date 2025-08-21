@@ -52,13 +52,13 @@ export function SummaryCards(): ReactElement {
   return (
     <div className="p-6 space-y-6">
       <div className="flex flex-wrap gap-4">
-        <Button onClick={handleAddAnimal} variant="outline" className="gap-2">
-          <PlusCircle className="h-4 w-4" />
-          Add Animal
-        </Button>
         <Button onClick={handleAddAnimalType} variant="outline" className="gap-2">
           <PlusCircle className="h-4 w-4" />
           Add Animal Type
+        </Button>
+        <Button onClick={handleAddAnimal} variant="outline" className="gap-2">
+          <PlusCircle className="h-4 w-4" />
+          Add Animal
         </Button>
       </div>
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">

@@ -32,7 +32,7 @@ import {
 } from './ui/table'
 import { Label } from './ui/label'
 import { toast } from 'sonner'
-import { PawPrint } from 'lucide-react'
+import { PawPrint, Download } from 'lucide-react'
 
 interface AnimalFormData extends Omit<Animal, 'id' | 'created_at' | 'updated_at' | 'type'> {
   type_id: number
@@ -189,6 +189,21 @@ export const Animals = forwardRef<AnimalsHandles>((_, ref) => {
     <div className="container mx-auto p-4 space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Animals</h2>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            onClick={async () => {
+              const res = await window.api.exportAnimalsToExcel()
+              if (res?.success) {
+                toast.success('Exported to Excel', { description: res.filePath })
+              } else {
+                toast.error(res?.message || 'Export failed')
+              }
+            }}
+          >
+            <Download className="mr-2 h-4 w-4" /> Export to Excel
+          </Button>
+        
         <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
           <DrawerTrigger asChild>
             <Button onClick={() => {
@@ -479,6 +494,7 @@ export const Animals = forwardRef<AnimalsHandles>((_, ref) => {
             </DrawerFooter>
           </DrawerContent>
         </Drawer>
+        </div>
       </div>
 
       {/* Animal Profile Dialog */}
