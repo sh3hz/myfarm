@@ -48,8 +48,8 @@ export function AnimalTypePie(): ReactElement {
   if (!data.length) return <div className="text-sm text-muted-foreground">No data</div>
 
   return (
-    <div className="px-6">
-    <Card className="max-w-4xl mx-auto overflow-hidden">
+    <div className="p-6">
+    <Card className="w-full overflow-hidden">
       <CardHeader className="p-6 pb-2">
         <CardTitle className="text-sm font-medium">Animals by Type</CardTitle>
       </CardHeader>

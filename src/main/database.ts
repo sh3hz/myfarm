@@ -32,7 +32,7 @@ export interface Animal {
   acquisitionLocation?: string;
   exitDate?: string;
   exitReason?: string;
-  age: number;
+  age?: number | null;
   type_id: number;
   description: string;
   image?: string;
@@ -77,7 +77,7 @@ class DatabaseService {
         acquisition_location TEXT,
         exit_date TEXT,
         exit_reason TEXT,
-        age INTEGER NOT NULL,
+        age INTEGER,
         type_id INTEGER NOT NULL,
         description TEXT NOT NULL,
         image TEXT,
@@ -97,6 +97,56 @@ class DatabaseService {
       }
     } catch (error) {
       console.error('Error checking/adding image column:', error);
+    }
+
+    // Migration: ensure animals.age is nullable (drop NOT NULL if present)
+    try {
+      const tableInfo = this.db.prepare("PRAGMA table_info(animals)").all() as Array<{ name: string; notnull: number }>
+      const ageCol = tableInfo.find((c) => c.name === 'age')
+      if (ageCol && ageCol.notnull === 1) {
+        this.db.exec('BEGIN TRANSACTION')
+        this.db.exec(`
+          CREATE TABLE IF NOT EXISTS animals_new (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            tag_number TEXT,
+            name TEXT NOT NULL,
+            breed TEXT,
+            gender TEXT NOT NULL DEFAULT 'UNKNOWN' CHECK(gender IN ('MALE', 'FEMALE', 'CASTRATED', 'UNKNOWN')),
+            date_of_birth TEXT,
+            weight REAL,
+            height REAL,
+            acquisition_date TEXT,
+            acquisition_location TEXT,
+            exit_date TEXT,
+            exit_reason TEXT,
+            age INTEGER,
+            type_id INTEGER NOT NULL,
+            description TEXT NOT NULL,
+            image TEXT,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (type_id) REFERENCES animal_types(id) ON DELETE CASCADE
+          );
+        `)
+        this.db.exec(`
+          INSERT INTO animals_new (
+            id, tag_number, name, breed, gender, date_of_birth, weight, height,
+            acquisition_date, acquisition_location, exit_date, exit_reason, age,
+            type_id, description, image, created_at, updated_at
+          )
+          SELECT 
+            id, tag_number, name, breed, gender, date_of_birth, weight, height,
+            acquisition_date, acquisition_location, exit_date, exit_reason, age,
+            type_id, description, image, created_at, updated_at
+          FROM animals;
+        `)
+        this.db.exec('DROP TABLE animals')
+        this.db.exec('ALTER TABLE animals_new RENAME TO animals')
+        this.db.exec('COMMIT')
+      }
+    } catch (error) {
+      console.error('Error migrating animals.age to nullable:', error)
+      this.db.exec('ROLLBACK')
     }
 
     // Create app_info table if it doesn't exist
@@ -258,7 +308,7 @@ class DatabaseService {
       stmt.run(
         animal.name,
         animal.breed,
-        animal.age,
+        animal.age ?? null,
         animal.type_id,
         animal.description,
         animal.image,
@@ -297,7 +347,7 @@ class DatabaseService {
       `).get(
         data.name ?? current.name,
         data.breed ?? current.breed,
-        data.age ?? current.age,
+        (data.age !== undefined ? data.age : current.age) ?? null,
         data.type_id ?? current.type_id,
         data.description ?? current.description,
         data.image ?? current.image,

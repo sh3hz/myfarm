@@ -50,7 +50,7 @@ interface AnimalFormData extends Omit<Animal, 'id' | 'created_at' | 'updated_at'
 
 const defaultAnimal: AnimalFormData = {
   name: '',
-  age: 0,
+  age: undefined,
   type_id: 0,
   description: '',
   image: '',
@@ -122,7 +122,11 @@ export const Animals = forwardRef<AnimalsHandles>((_, ref) => {
     const { name, value } = e.target
     setFormData(prev => ({
       ...prev,
-      [name]: name === 'age' || name === 'type_id' ? Number(value) : value
+      [name]: name === 'age'
+        ? (value === '' ? undefined : Number(value))
+        : name === 'type_id'
+        ? Number(value)
+        : value
     }))
   }
 
@@ -163,7 +167,7 @@ export const Animals = forwardRef<AnimalsHandles>((_, ref) => {
     setFormData({
       name: animal.name,
       breed: animal.breed || '',
-      age: animal.age,
+      age: animal.age ?? undefined,
       type_id: animal.type_id,
       description: animal.description,
       image: animal.image,
@@ -230,9 +234,8 @@ export const Animals = forwardRef<AnimalsHandles>((_, ref) => {
                       id="age"
                       name="age"
                       type="number"
-                      value={formData.age}
+                      value={formData.age ?? ''}
                       onChange={handleInputChange}
-                      required
                     />
                   </div>
                   <div className="space-y-2">
@@ -515,7 +518,7 @@ export const Animals = forwardRef<AnimalsHandles>((_, ref) => {
                  animal.gender === 'FEMALE' ? '♀' :
                  animal.gender === 'CASTRATED' ? '♂ (N)' : '?'}
               </TableCell>
-              <TableCell>{animal.age} yrs</TableCell>
+              <TableCell>{animal.age && animal.age > 0 ? `${animal.age} yrs` : '-'}</TableCell>
               <TableCell>{animal.type?.name}</TableCell>
               <TableCell>{animal.dateOfBirth ? new Date(animal.dateOfBirth).toLocaleDateString() : '-'}</TableCell>
               <TableCell>{animal.weight ? `${animal.weight}kg` : '-'}</TableCell>
