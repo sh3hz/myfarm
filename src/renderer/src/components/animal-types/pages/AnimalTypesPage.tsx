@@ -1,28 +1,7 @@
 import { useState, useEffect, forwardRef, useImperativeHandle } from 'react'
 import { Button } from '@renderer/components/ui/button'
-import { Toaster } from '@renderer/components/ui/sonner'
 import { toast } from 'sonner'
-import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from '@renderer/components/ui/sheet'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@renderer/components/ui/dialog'
 import { Input } from '@renderer/components/ui/input'
-import { Label } from '@renderer/components/ui/label'
 import {
   Table,
   TableBody,
@@ -32,13 +11,15 @@ import {
   TableHeader,
   TableRow,
 } from '@renderer/components/ui/table'
+import { Trash2, Save, X, Plus } from 'lucide-react'
 
 interface AnimalType {
-  id: number
+  id: number | 'new'
   name: string
   description: string
-  created_at: string
-  updated_at: string
+  created_at?: string
+  updated_at?: string
+  isEditing?: boolean
 }
 
 interface AnimalTypesHandles {
@@ -47,42 +28,56 @@ interface AnimalTypesHandles {
 
 export const AnimalTypesPage = forwardRef<AnimalTypesHandles>((_, ref) => {
   const [animalTypes, setAnimalTypes] = useState<AnimalType[]>([])
-  const [selectedType, setSelectedType] = useState<AnimalType | null>(null)
-  const [addOpen, setAddOpen] = useState(false)
+  const [isAdding, setIsAdding] = useState(false)
+  const [newType, setNewType] = useState<Omit<AnimalType, 'id'>>({ 
+    name: '', 
+    description: '',
+    isEditing: true 
+  })
 
   useImperativeHandle(ref, () => ({
     openDialog: () => {
-      setSelectedType(null)
-      setName('')
-      setDescription('')
-      setAddOpen(true)
+      setIsAdding(true)
+      setNewType({ name: '', description: '', isEditing: true })
     }
   }))
-  const [name, setName] = useState('')
-  const [description, setDescription] = useState('')
 
   const loadAnimalTypes = async (): Promise<void> => {
-    const types = await window.api.getAnimalTypes()
-    setAnimalTypes(types)
+    try {
+      const types = await window.api.getAnimalTypes()
+      setAnimalTypes(types.map(type => ({ ...type, isEditing: false })))
+    } catch (error) {
+      toast.error('Failed to load animal types')
+    }
   }
 
   useEffect(() => {
     loadAnimalTypes()
   }, [])
 
-  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
-    e.preventDefault()
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, field: 'name' | 'description', id: number | 'new') => {
+    if (id === 'new') {
+      setNewType(prev => ({ ...prev, [field]: e.target.value }))
+    } else {
+      setAnimalTypes(prev => 
+        prev.map(type => 
+          type.id === id ? { ...type, [field]: e.target.value } : type
+        )
+      )
+    }
+  }
+
+  const handleSave = async (type: AnimalType): Promise<void> => {
     try {
-      if (selectedType) {
-        await window.api.updateAnimalType(selectedType.id, name, description)
-        toast.success('Animal type updated successfully')
-      } else {
-        await window.api.createAnimalType(name, description)
+      if (type.id === 'new') {
+        await window.api.createAnimalType(type.name, type.description)
         toast.success('Animal type created successfully')
+        setIsAdding(false)
+        setNewType({ name: '', description: '', isEditing: true })
+      } else {
+        await window.api.updateAnimalType(type.id, type.name, type.description)
+        toast.success('Animal type updated successfully')
       }
-      setSelectedType(null)
-      setName('')
-      setDescription('')
       loadAnimalTypes()
     } catch (error: unknown) {
       if (error instanceof Error && error.message.includes('UNIQUE constraint failed')) {
@@ -103,65 +98,43 @@ export const AnimalTypesPage = forwardRef<AnimalTypesHandles>((_, ref) => {
     }
   }
 
-  const handleEdit = (type: AnimalType): void => {
-    setSelectedType(type)
-    setName(type.name)
-    setDescription(type.description)
+  const startEditing = (id: number): void => {
+    setAnimalTypes(prev => 
+      prev.map(type => ({
+        ...type,
+        isEditing: type.id === id
+      }))
+    )
   }
 
-  const handleAdd = (): void => {
-    setSelectedType(null)
-    setName('')
-    setDescription('')
+  const cancelEditing = (id: number | 'new'): void => {
+    if (id === 'new') {
+      setIsAdding(false)
+      setNewType({ name: '', description: '', isEditing: true })
+    } else {
+      setAnimalTypes(prev => 
+        prev.map(type => ({
+          ...type,
+          isEditing: false
+        }))
+      )
+      loadAnimalTypes()
+    }
+  }
+
+  const handleAddNew = (): void => {
+    if (isAdding) return
+    setIsAdding(true)
+    setNewType({ name: '', description: '', isEditing: true })
   }
 
   return (
     <div className="p-4">
-      <Toaster />
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold">Animal Types</h2>
-        <Sheet open={addOpen} onOpenChange={setAddOpen}>
-          <SheetTrigger asChild>
-            <Button onClick={handleAdd}>Add Animal Type</Button>
-          </SheetTrigger>
-          <SheetContent>
-            <SheetHeader>
-              <SheetTitle>{selectedType ? 'Edit' : 'Add'} Animal Type</SheetTitle>
-              <SheetDescription>
-                {selectedType ? 'Update' : 'Add a new'} animal type in your database.
-              </SheetDescription>
-            </SheetHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="name" className="text-right">
-                  Name
-                </Label>
-                <Input
-                  id="name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="col-span-3"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="description" className="text-right">
-                  Description
-                </Label>
-                <Input
-                  id="description"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  className="col-span-3"
-                />
-              </div>
-            </div>
-            <SheetFooter>
-              <SheetClose asChild>
-                <Button onClick={handleSubmit} type="submit">Save changes</Button>
-              </SheetClose>
-            </SheetFooter>
-          </SheetContent>
-        </Sheet>
+        <Button onClick={handleAddNew} disabled={isAdding}>
+          <Plus className="mr-2 h-4 w-4" /> Add Animal Type
+        </Button>
       </div>
 
       <Table>
@@ -170,82 +143,113 @@ export const AnimalTypesPage = forwardRef<AnimalTypesHandles>((_, ref) => {
           <TableRow>
             <TableHead>Name</TableHead>
             <TableHead>Description</TableHead>
-            <TableHead>Actions</TableHead>
+            <TableHead className="w-48">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
+          {/* New animal type row */}
+          {isAdding && (
+            <TableRow className="bg-muted/50">
+              <TableCell>
+                <Input
+                  value={newType.name}
+                  onChange={(e) => handleInputChange(e, 'name', 'new')}
+                  placeholder="Enter name"
+                  className="w-full"
+                />
+              </TableCell>
+              <TableCell>
+                <Input
+                  value={newType.description}
+                  onChange={(e) => handleInputChange(e, 'description', 'new')}
+                  placeholder="Enter description"
+                  className="w-full"
+                />
+              </TableCell>
+              <TableCell className="space-x-2">
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  onClick={() => cancelEditing('new')}
+                >
+                  <X className="h-4 w-4 mr-1" /> Cancel
+                </Button>
+                <Button 
+                  size="sm" 
+                  onClick={() => handleSave({...newType, id: 'new'})}
+                  disabled={!newType.name.trim()}
+                >
+                  <Save className="h-4 w-4 mr-1" /> Save
+                </Button>
+              </TableCell>
+            </TableRow>
+          )}
+
+          {/* Existing animal types */}
           {animalTypes.map((type) => (
             <TableRow key={type.id}>
-              <TableCell>{type.name}</TableCell>
-              <TableCell>{type.description}</TableCell>
               <TableCell>
-                <Sheet>
-                  <SheetTrigger asChild>
-                    <Button variant="outline" className="mr-2" onClick={() => handleEdit(type)}>
+                {type.isEditing ? (
+                  <Input
+                    value={type.name}
+                    onChange={(e) => handleInputChange(e, 'name', type.id)}
+                    className="w-full"
+                  />
+                ) : (
+                  type.name
+                )}
+              </TableCell>
+              <TableCell>
+                {type.isEditing ? (
+                  <Input
+                    value={type.description}
+                    onChange={(e) => handleInputChange(e, 'description', type.id)}
+                    className="w-full"
+                  />
+                ) : (
+                  type.description
+                )}
+              </TableCell>
+              <TableCell className="space-x-2">
+                {type.isEditing ? (
+                  <>
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      onClick={() => cancelEditing(type.id)}
+                      className="h-8"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      onClick={() => handleSave(type)}
+                      disabled={!type.name.trim()}
+                      className="h-8"
+                    >
+                      <Save className="h-4 w-4" />
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button 
+                      size="sm" 
+                      variant="destructive" 
+                      onClick={() => handleDelete(type.id as number)}
+                      className="h-8"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      onClick={() => startEditing(type.id as number)}
+                      className="h-8"
+                    >
                       Edit
                     </Button>
-                  </SheetTrigger>
-                  <SheetContent>
-                    <SheetHeader>
-                      <SheetTitle>Edit Animal Type</SheetTitle>
-                      <SheetDescription>
-                        Make changes to the animal type.
-                      </SheetDescription>
-                    </SheetHeader>
-                    <div className="grid gap-4 py-4">
-                      <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="name" className="text-right">
-                          Name
-                        </Label>
-                        <Input
-                          id="name"
-                          value={name}
-                          onChange={(e) => setName(e.target.value)}
-                          className="col-span-3"
-                        />
-                      </div>
-                      <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="description" className="text-right">
-                          Description
-                        </Label>
-                        <Input
-                          id="description"
-                          value={description}
-                          onChange={(e) => setDescription(e.target.value)}
-                          className="col-span-3"
-                        />
-                      </div>
-                    </div>
-                    <SheetFooter className="flex gap-4">
-                      <SheetClose asChild>
-                        <Button onClick={handleSubmit} type="submit" className="flex-1">Save changes</Button>
-                      </SheetClose>
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button variant="destructive" type="button">Delete</Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                          <DialogHeader>
-                            <DialogTitle>Delete Animal Type</DialogTitle>
-                            <DialogDescription>
-                              Are you sure you want to delete &quot;{type.name}&quot;? This action cannot be undone.
-                            </DialogDescription>
-                          </DialogHeader>
-                          <DialogFooter>
-                            <Button variant="outline" type="button">Cancel</Button>
-                            <Button
-                              variant="destructive"
-                              type="button"
-                              onClick={() => handleDelete(type.id)}
-                            >
-                              Delete
-                            </Button>
-                          </DialogFooter>
-                        </DialogContent>
-                      </Dialog>
-                    </SheetFooter>
-                  </SheetContent>
-                </Sheet>
+                  </>
+                )}
               </TableCell>
             </TableRow>
           ))}
