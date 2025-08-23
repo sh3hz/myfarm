@@ -1,6 +1,6 @@
 import { ipcMain, dialog, app } from 'electron'
 import { databaseService } from '../database'
-import type { Animal } from '../database'
+import type { Animal } from '../db/models'
 import * as XLSX from 'xlsx'
 import path from 'path'
 

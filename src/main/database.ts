@@ -1,172 +1,20 @@
-import Database from 'better-sqlite3';
-import { app } from 'electron';
-import path from 'path';
+import type Database from 'better-sqlite3';
+import { getDb } from './db/connection';
+import { initDatabase } from './db/schema';
+import type { AppInfo, AnimalType, Animal, Gender } from './db/models';
 
-export interface AppInfo {
-  id: number;
-  name: string;
-  version: string;
-  description: string;
-}
-
-export interface AnimalType {
-  id: number;
-  name: string;
-  description: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export type Gender = 'MALE' | 'FEMALE' | 'CASTRATED' | 'UNKNOWN';
-
-export interface Animal {
-  id: number;
-  tagNumber?: string;
-  name: string;
-  breed?: string;
-  gender: Gender;
-  dateOfBirth?: string;
-  weight?: number;
-  height?: number;
-  acquisitionDate?: string;
-  acquisitionLocation?: string;
-  exitDate?: string;
-  exitReason?: string;
-  age?: number | null;
-  type_id: number;
-  description: string;
-  image?: string;
-  created_at: string;
-  updated_at: string;
-  type?: AnimalType;
-}
+// Models are imported from ./db/models
 
 class DatabaseService {
   private db: Database.Database;
 
   constructor() {
-    const dbPath = path.join(app.getPath('userData'), 'app.db');
-    this.db = new Database(dbPath);
+    this.db = getDb();
     this.init();
   }
 
   private init() {
-    // Create animal_types table if it doesn't exist
-    this.db.exec(`
-      CREATE TABLE IF NOT EXISTS animal_types (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL UNIQUE,
-        description TEXT,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-
-    // Create animals table if it doesn't exist
-    this.db.exec(`
-      CREATE TABLE IF NOT EXISTS animals (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        tag_number TEXT,
-        name TEXT NOT NULL,
-        breed TEXT,
-        gender TEXT NOT NULL DEFAULT 'UNKNOWN' CHECK(gender IN ('MALE', 'FEMALE', 'CASTRATED', 'UNKNOWN')),
-        date_of_birth TEXT,
-        weight REAL,
-        height REAL,
-        acquisition_date TEXT,
-        acquisition_location TEXT,
-        exit_date TEXT,
-        exit_reason TEXT,
-        age INTEGER,
-        type_id INTEGER NOT NULL,
-        description TEXT NOT NULL,
-        image TEXT,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (type_id) REFERENCES animal_types(id) ON DELETE CASCADE
-      )
-    `);
-
-    // Add image column to animals table if it doesn't exist
-    try {
-      const tableInfo = this.db.prepare("PRAGMA table_info(animals)").all();
-      const hasImageColumn = tableInfo.some((column: any) => column.name === 'image');
-
-      if (!hasImageColumn) {
-        this.db.exec('ALTER TABLE animals ADD COLUMN image TEXT');
-      }
-    } catch (error) {
-      console.error('Error checking/adding image column:', error);
-    }
-
-    // Migration: ensure animals.age is nullable (drop NOT NULL if present)
-    try {
-      const tableInfo = this.db.prepare("PRAGMA table_info(animals)").all() as Array<{ name: string; notnull: number }>
-      const ageCol = tableInfo.find((c) => c.name === 'age')
-      if (ageCol && ageCol.notnull === 1) {
-        this.db.exec('BEGIN TRANSACTION')
-        this.db.exec(`
-          CREATE TABLE IF NOT EXISTS animals_new (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            tag_number TEXT,
-            name TEXT NOT NULL,
-            breed TEXT,
-            gender TEXT NOT NULL DEFAULT 'UNKNOWN' CHECK(gender IN ('MALE', 'FEMALE', 'CASTRATED', 'UNKNOWN')),
-            date_of_birth TEXT,
-            weight REAL,
-            height REAL,
-            acquisition_date TEXT,
-            acquisition_location TEXT,
-            exit_date TEXT,
-            exit_reason TEXT,
-            age INTEGER,
-            type_id INTEGER NOT NULL,
-            description TEXT NOT NULL,
-            image TEXT,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (type_id) REFERENCES animal_types(id) ON DELETE CASCADE
-          );
-        `)
-        this.db.exec(`
-          INSERT INTO animals_new (
-            id, tag_number, name, breed, gender, date_of_birth, weight, height,
-            acquisition_date, acquisition_location, exit_date, exit_reason, age,
-            type_id, description, image, created_at, updated_at
-          )
-          SELECT 
-            id, tag_number, name, breed, gender, date_of_birth, weight, height,
-            acquisition_date, acquisition_location, exit_date, exit_reason, age,
-            type_id, description, image, created_at, updated_at
-          FROM animals;
-        `)
-        this.db.exec('DROP TABLE animals')
-        this.db.exec('ALTER TABLE animals_new RENAME TO animals')
-        this.db.exec('COMMIT')
-      }
-    } catch (error) {
-      console.error('Error migrating animals.age to nullable:', error)
-      this.db.exec('ROLLBACK')
-    }
-
-    // Create app_info table if it doesn't exist
-    this.db.exec(`
-      CREATE TABLE IF NOT EXISTS app_info (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        version TEXT NOT NULL,
-        description TEXT
-      )
-    `);
-
-    // Insert default app info if not exists
-    const count = this.db.prepare('SELECT COUNT(*) as count FROM app_info').get() as { count: number };
-    if (count.count === 0) {
-      this.db.prepare(`
-        INSERT INTO app_info (name, version, description)
-        VALUES (?, ?, ?)
-      `).run('Vite Electron App', app.getVersion(), 'A Vite + Electron application');
-    }
+    initDatabase(this.db)
   }
 
   getAppInfo(): AppInfo {
@@ -450,6 +298,3 @@ class DatabaseService {
 
 // Create database service instance
 export const databaseService = new DatabaseService();
-
-// Debug: Dump initial database content
-databaseService.debugDumpTable();

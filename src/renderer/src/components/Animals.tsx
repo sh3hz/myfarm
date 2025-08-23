@@ -1,6 +1,6 @@
 import { useState, useEffect, forwardRef } from 'react'
 import * as React from 'react'
-import type { Animal, Gender } from '../../../main/database'
+import type { Animal, Gender } from '../../../shared/types/models'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
 import {
