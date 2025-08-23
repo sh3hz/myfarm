@@ -13,6 +13,7 @@ export function AnimalsToolbar({ onAdd, onExport }: Props): ReactElement {
       <Button variant="outline" onClick={onExport}>
         <Download className="mr-2 h-4 w-4" /> Export to Excel
       </Button>
+      <Button onClick={onAdd}>Add Animal Type</Button>
       <Button onClick={onAdd}>Add Animal</Button>
     </div>
   )
