@@ -8,5 +8,7 @@ export function getDb(): Database.Database {
   if (instance) return instance
   const dbPath = path.join(app.getPath('userData'), 'app.db')
   instance = new Database(dbPath)
+  // Ensure foreign key constraints are enforced
+  instance.pragma('foreign_keys = ON')
   return instance
 }
