@@ -19,20 +19,15 @@ import {
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
-  DrawerTrigger,
   DrawerClose,
 } from './ui/drawer'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from './ui/table'
+// Table moved to AnimalsTable component
 import { Label } from './ui/label'
 import { toast } from 'sonner'
-import { PawPrint, Download } from 'lucide-react'
+import { PawPrint } from 'lucide-react'
+import { AnimalsToolbar } from './animals/AnimalsToolbar'
+import { AnimalViewDialog } from './animals/AnimalViewDialog'
+import { AnimalsTable } from './animals/AnimalsTable'
 
 interface AnimalFormData extends Omit<Animal, 'id' | 'created_at' | 'updated_at' | 'type'> {
   type_id: number
@@ -190,9 +185,13 @@ export const Animals = forwardRef<AnimalsHandles>((_, ref) => {
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Animals</h2>
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            onClick={async () => {
+          <AnimalsToolbar
+            onAdd={() => {
+              setSelectedAnimal(null)
+              setFormData(defaultAnimal)
+              setDrawerOpen(true)
+            }}
+            onExport={async () => {
               const res = await window.api.exportAnimalsToExcel()
               if (res?.success) {
                 toast.success('Exported to Excel', { description: res.filePath })
@@ -200,20 +199,9 @@ export const Animals = forwardRef<AnimalsHandles>((_, ref) => {
                 toast.error(res?.message || 'Export failed')
               }
             }}
-          >
-            <Download className="mr-2 h-4 w-4" /> Export to Excel
-          </Button>
-        
+          />
+
         <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
-          <DrawerTrigger asChild>
-            <Button onClick={() => {
-              setSelectedAnimal(null)
-              setFormData(defaultAnimal)
-              setDrawerOpen(true)
-            }}>
-              Add Animal
-            </Button>
-          </DrawerTrigger>
           <DrawerContent className="flex flex-col h-[100dvh] w-full">
             <DrawerHeader>
               <DrawerTitle>{selectedAnimal ? 'Edit Animal' : 'Add New Animal'}</DrawerTitle>
@@ -498,149 +486,25 @@ export const Animals = forwardRef<AnimalsHandles>((_, ref) => {
       </div>
 
       {/* Animal Profile Dialog */}
-      <Dialog open={viewOpen} onOpenChange={setViewOpen}>
-        <DialogContent className="max-w-3xl">
-          <DialogHeader>
-            <DialogTitle>{viewAnimal?.name}</DialogTitle>
-          </DialogHeader>
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-            {/* Left: Large Image + Description */}
-            <div className="space-y-3">
-              <div className="relative w-full aspect-square rounded-lg bg-muted overflow-hidden flex items-center justify-center">
-                {viewAnimal?.image && imagePaths[viewAnimal.image] ? (
-                  <img
-                    src={imagePaths[viewAnimal.image]}
-                    alt={viewAnimal.name}
-                    className="object-cover w-full h-full"
-                  />
-                ) : (
-                  <PawPrint className="w-20 h-20 text-muted-foreground" />
-                )}
-              </div>
-              <div className="text-sm text-muted-foreground">
-                {viewAnimal?.description || 'No description provided.'}
-              </div>
-            </div>
+      <AnimalViewDialog
+        open={viewOpen}
+        onOpenChange={setViewOpen}
+        animal={viewAnimal}
+        imageSrc={viewAnimal?.image ? imagePaths[viewAnimal.image] : undefined}
+      />
 
-            {/* Right: Details */}
-            <div className="space-y-2 text-sm">
-              <div><span className="text-muted-foreground">Tag:</span> {viewAnimal?.tagNumber || '-'}</div>
-              <div><span className="text-muted-foreground">Breed:</span> {viewAnimal?.breed || '-'}</div>
-              <div>
-                <span className="text-muted-foreground">Gender:</span>{' '}
-                {viewAnimal
-                  ? viewAnimal.gender === 'MALE'
-                    ? 'Male'
-                    : viewAnimal.gender === 'FEMALE'
-                      ? 'Female'
-                      : viewAnimal.gender === 'CASTRATED'
-                        ? 'Castrated'
-                        : 'Unknown'
-                  : '-'}
-              </div>
-              <div>
-                <span className="text-muted-foreground">Age:</span>{' '}
-                {viewAnimal?.age && viewAnimal.age > 0 ? `${viewAnimal.age} yrs` : '-'}
-              </div>
-              <div><span className="text-muted-foreground">Type:</span> {viewAnimal?.type?.name || '-'}</div>
-              <div>
-                <span className="text-muted-foreground">DOB:</span>{' '}
-                {viewAnimal?.dateOfBirth ? new Date(viewAnimal.dateOfBirth).toLocaleDateString() : '-'}
-              </div>
-              <div>
-                <span className="text-muted-foreground">Weight:</span>{' '}
-                {viewAnimal?.weight ? `${viewAnimal.weight} kg` : '-'}
-              </div>
-              <div>
-                <span className="text-muted-foreground">Height:</span>{' '}
-                {viewAnimal?.height ? `${viewAnimal.height} cm` : '-'}
-              </div>
-              <div>
-                <span className="text-muted-foreground">Acquired:</span>{' '}
-                {viewAnimal?.acquisitionDate ? new Date(viewAnimal.acquisitionDate).toLocaleDateString() : '-'}{' '}
-                {viewAnimal?.acquisitionLocation ? `(${viewAnimal.acquisitionLocation})` : ''}
-              </div>
-              <div>
-                <span className="text-muted-foreground">Exit:</span>{' '}
-                {viewAnimal?.exitDate ? new Date(viewAnimal.exitDate).toLocaleDateString() : '-'}{' '}
-                {viewAnimal?.exitReason ? `(${viewAnimal.exitReason})` : ''}
-              </div>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setViewOpen(false)}>
-              Close
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Image</TableHead>
-            <TableHead>Name</TableHead>
-            <TableHead>ID</TableHead>
-            <TableHead>Breed</TableHead>
-            <TableHead>Gender</TableHead>
-            <TableHead>Age</TableHead>
-            <TableHead>Type</TableHead>
-            <TableHead>DOB</TableHead>
-            <TableHead>Weight (kg)</TableHead>
-            <TableHead>Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {animals.map(animal => (
-            <TableRow key={animal.id}>
-              <TableCell>
-                <div className="relative w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-                  {animal.image && imagePaths[animal.image] ? (
-                    <img
-                      src={imagePaths[animal.image]}
-                      alt={animal.name}
-                      className="object-cover w-full h-full"
-                    />
-                  ) : (
-                    <PawPrint className="w-5 h-5 text-muted-foreground" />
-                  )}
-                </div>
-              </TableCell>
-              <TableCell className="font-medium">{animal.name}</TableCell>
-              <TableCell className="font-mono text-xs">{animal.tagNumber}</TableCell>
-              <TableCell>{animal.breed || '-'}</TableCell>
-              <TableCell>
-                {animal.gender === 'MALE' ? '♂' : 
-                 animal.gender === 'FEMALE' ? '♀' :
-                 animal.gender === 'CASTRATED' ? '♂ (N)' : '?'}
-              </TableCell>
-              <TableCell>{animal.age && animal.age > 0 ? `${animal.age} yrs` : '-'}</TableCell>
-              <TableCell>{animal.type?.name}</TableCell>
-              <TableCell>{animal.dateOfBirth ? new Date(animal.dateOfBirth).toLocaleDateString() : '-'}</TableCell>
-              <TableCell>{animal.weight ? `${animal.weight}kg` : '-'}</TableCell>
-              <TableCell>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  className="mr-2"
-                  onClick={() => {
-                    setViewAnimal(animal)
-                    setViewOpen(true)
-                  }}
-                >
-                  View
-                </Button>
-                <Button variant="outline" size="sm" onClick={() => {
-                  handleEdit(animal)
-                  setDrawerOpen(true)
-                }}>
-                  Edit
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+      <AnimalsTable
+        animals={animals}
+        imagePaths={imagePaths}
+        onView={(animal) => {
+          setViewAnimal(animal)
+          setViewOpen(true)
+        }}
+        onEdit={(animal) => {
+          handleEdit(animal)
+          setDrawerOpen(true)
+        }}
+      />
     </div>
   )
 })
