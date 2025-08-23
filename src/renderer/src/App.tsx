@@ -4,6 +4,7 @@ import { AnimalTypes } from '@renderer/components/animal-types'
 import { Animals } from '@renderer/components/animals'
 import { SummaryCards } from '@renderer/components/dashboard'
 import { AnimalTypePie } from '@renderer/components/dashboard/charts'
+import { Toaster } from '@renderer/components/ui/sonner'
 
 function App(): React.JSX.Element {
   
@@ -13,7 +14,7 @@ function App(): React.JSX.Element {
   const animalTypesRef = useRef<{ openDialog: () => void }>(null)
 
   useEffect(() => {
-    const handleOpenAnimalDialog = () => {
+    const handleOpenAnimalDialog = (): void => {
       if (currentPath !== '/animals') {
         setCurrentPath('/animals')
         // Small timeout to ensure the Animals component is mounted
@@ -25,7 +26,7 @@ function App(): React.JSX.Element {
       }
     }
 
-    const handleOpenAnimalTypeDialog = () => {
+    const handleOpenAnimalTypeDialog = (): void => {
       if (currentPath !== '/settings') {
         setCurrentPath('/settings')
         // Small timeout to ensure the AnimalTypes component is mounted
@@ -46,7 +47,7 @@ function App(): React.JSX.Element {
     }
   }, [currentPath])
 
-  const renderContent = () => {
+  const renderContent = (): React.ReactNode => {
     switch (currentPath) {
       case '/':
         return (
@@ -68,10 +69,9 @@ function App(): React.JSX.Element {
 
   return (
     <>
-      <Navigation onNavigate={setCurrentPath} currentPath={currentPath} />
-      <div className="container py-8">
-        {renderContent()}
-      </div>
+      <Navigation currentPath={currentPath} onNavigate={setCurrentPath} />
+      <div className="flex-1 overflow-auto">{renderContent()}</div>
+      <Toaster position="top-right" />
     </>
   )
 }
