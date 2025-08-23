@@ -1,13 +1,12 @@
 import { useState } from 'react'
 import { Button } from '@renderer/components/ui/button'
 import { Sheet, SheetContent, SheetTrigger } from '@renderer/components/ui/sheet'
-import { PawPrint, ScrollText, Menu, Home, Settings } from 'lucide-react'
+import { PawPrint, ScrollText, Menu, Home } from 'lucide-react'
 import { cn } from '@renderer/lib/utils'
 
 const navigation = [
   { name: 'Home', href: '/', icon: Home },
-  { name: 'Animals', href: '/animals', icon: ScrollText },
-  { name: 'Categories', href: '/settings', icon: Settings }
+  { name: 'Animals', href: '/animals', icon: ScrollText }
 ]
 
 interface NavigationProps {

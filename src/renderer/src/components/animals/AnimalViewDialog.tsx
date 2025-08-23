@@ -9,9 +9,18 @@ interface Props {
   onOpenChange: (open: boolean) => void
   animal: Animal | null
   imageSrc?: string
+  onEditClick?: (animal: Animal) => void
+  onDeleteClick?: (id: number) => Promise<void> | void
 }
 
-export function AnimalViewDialog({ open, onOpenChange, animal, imageSrc }: Props): ReactElement {
+export function AnimalViewDialog({ 
+  open, 
+  onOpenChange, 
+  animal, 
+  imageSrc, 
+  onEditClick, 
+  onDeleteClick 
+}: Props): ReactElement {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl">
@@ -88,8 +97,25 @@ export function AnimalViewDialog({ open, onOpenChange, animal, imageSrc }: Props
             </div>
           </div>
         </div>
-        <DialogFooter>
-          <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+        <DialogFooter className="gap-2">
+          {onDeleteClick && animal && (
+            <Button 
+              variant="destructive" 
+              onClick={() => onDeleteClick(animal.id)}
+              className="mr-auto"
+            >
+              Delete
+            </Button>
+          )}
+          {onEditClick && animal && (
+            <Button 
+              variant="outline"
+              onClick={() => onEditClick(animal)}
+            >
+              Edit
+            </Button>
+          )}
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
             Close
           </Button>
         </DialogFooter>

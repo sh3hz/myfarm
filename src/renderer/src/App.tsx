@@ -1,6 +1,5 @@
-import { useEffect, useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Navigation } from '@renderer/components/layout'
-import { AnimalTypes } from '@renderer/components/animal-types'
 import { Animals } from '@renderer/components/animals'
 import { SummaryCards } from '@renderer/components/dashboard'
 import { AnimalTypePie } from '@renderer/components/dashboard/charts'
@@ -11,7 +10,6 @@ function App(): React.JSX.Element {
 
   const [currentPath, setCurrentPath] = useState('/')
   const animalsRef = useRef<{ openDialog: () => void }>(null)
-  const animalTypesRef = useRef<{ openDialog: () => void }>(null)
 
   useEffect(() => {
     const handleOpenAnimalDialog = (): void => {
@@ -26,24 +24,10 @@ function App(): React.JSX.Element {
       }
     }
 
-    const handleOpenAnimalTypeDialog = (): void => {
-      if (currentPath !== '/settings') {
-        setCurrentPath('/settings')
-        // Small timeout to ensure the AnimalTypes component is mounted
-        setTimeout(() => {
-          animalTypesRef.current?.openDialog()
-        }, 100)
-      } else {
-        animalTypesRef.current?.openDialog()
-      }
-    }
-
     window.addEventListener('open-animal-dialog', handleOpenAnimalDialog)
-    window.addEventListener('open-animal-type-dialog', handleOpenAnimalTypeDialog)
 
     return () => {
       window.removeEventListener('open-animal-dialog', handleOpenAnimalDialog)
-      window.removeEventListener('open-animal-type-dialog', handleOpenAnimalTypeDialog)
     }
   }, [currentPath])
 
@@ -60,8 +44,6 @@ function App(): React.JSX.Element {
         )
       case '/animals':
         return <Animals ref={animalsRef} />
-      case '/settings':
-        return <AnimalTypes ref={animalTypesRef} />
       default:
         return null
     }

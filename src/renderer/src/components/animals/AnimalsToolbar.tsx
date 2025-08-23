@@ -1,26 +1,27 @@
 import { Button } from '../ui/button'
-import { Download, PlusCircle } from 'lucide-react'
+import { Download, PlusCircle, List } from 'lucide-react'
 import type { ReactElement } from 'react'
 
 interface Props {
   onAdd: () => void
   onExport: () => Promise<void> | void
+  onManageTypes: () => void
 }
 
-export function AnimalsToolbar({ onAdd, onExport }: Props): ReactElement {
-  const handleAddAnimalType = (): void => {
-    window.dispatchEvent(new CustomEvent('open-animal-type-dialog'))
-  }
+export function AnimalsToolbar({ onAdd, onExport, onManageTypes }: Props): ReactElement {
   return (
     <div className="flex items-center gap-2">
       <Button variant="outline" onClick={onExport}>
         <Download className="mr-2 h-4 w-4" /> Export to Excel
       </Button>
-      <Button onClick={handleAddAnimalType} variant="outline" className="gap-2">
-        <PlusCircle className="h-4 w-4" />
-        Add Animal Type
+      <Button variant="outline" onClick={onManageTypes} className="gap-2">
+        <List className="h-4 w-4" />
+        Manage Animal Types
       </Button>
-      <Button onClick={onAdd}>Add Animal</Button>
+      <Button onClick={onAdd} className="gap-2">
+        <PlusCircle className="h-4 w-4" />
+        Add Animal
+      </Button>
     </div>
   )
 }
