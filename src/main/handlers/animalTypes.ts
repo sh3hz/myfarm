@@ -1,25 +1,25 @@
 import { ipcMain } from 'electron'
-import { databaseService } from '../database'
+import * as animalTypesRepo from '../db/repositories/animalTypesRepo'
 
 // Register IPC handlers for animal types
-export function registerAnimalTypeHandlers() {
+export function registerAnimalTypeHandlers(): void {
   ipcMain.handle('get-animal-types', async () => {
-    return databaseService.getAllAnimalTypes()
+    return animalTypesRepo.getAll()
   })
 
   ipcMain.handle('get-animal-type', async (_, id: number) => {
-    return databaseService.getAnimalTypeById(id)
+    return animalTypesRepo.getById(id)
   })
 
   ipcMain.handle('create-animal-type', async (_, name: string, description: string) => {
-    return databaseService.createAnimalType(name, description)
+    return animalTypesRepo.create(name, description)
   })
 
   ipcMain.handle('update-animal-type', async (_, id: number, name: string, description: string) => {
-    return databaseService.updateAnimalType(id, name, description)
+    return animalTypesRepo.update(id, name, description)
   })
 
   ipcMain.handle('delete-animal-type', async (_, id: number) => {
-    return databaseService.deleteAnimalType(id)
+    return animalTypesRepo.remove(id)
   })
 }

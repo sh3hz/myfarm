@@ -1,5 +1,5 @@
 import { ipcMain, dialog, app } from 'electron'
-import { databaseService } from '../database'
+import * as animalsRepo from '../db/repositories/animalsRepo'
 import type { Animal } from '../db/models'
 import * as XLSX from 'xlsx'
 import path from 'path'
@@ -7,17 +7,17 @@ import path from 'path'
 // Register IPC handlers for animals
 export function registerAnimalHandlers(): void {
   ipcMain.handle('get-animals', async (): Promise<Animal[]> => {
-    return databaseService.getAnimals()
+    return animalsRepo.getAll()
   })
 
   ipcMain.handle('get-animal', async (_: unknown, id: number): Promise<Animal | null> => {
-    return databaseService.getAnimalById(id) || null
+    return (await animalsRepo.getById(id)) || null
   })
 
   ipcMain.handle(
     'create-animal',
     async (_: unknown, data: Omit<Animal, 'id' | 'created_at' | 'updated_at'>): Promise<void> => {
-      await databaseService.createAnimal(data)
+      await animalsRepo.create(data)
     }
   )
 
@@ -28,12 +28,12 @@ export function registerAnimalHandlers(): void {
       id: number,
       data: Partial<Omit<Animal, 'id' | 'created_at' | 'updated_at'>>
     ): Promise<Animal | undefined> => {
-      return databaseService.updateAnimal(id, data)
+      return animalsRepo.update(id, data)
     }
   )
 
   ipcMain.handle('delete-animal', async (_: unknown, id: number): Promise<number> => {
-    databaseService.deleteAnimal(id)
+    await animalsRepo.remove(id)
     return id
   })
 
@@ -45,21 +45,21 @@ export function registerAnimalHandlers(): void {
       mostCommonType: string
       mostCommonTypeCount: number
     }> => {
-      return databaseService.getAnimalStats()
+      return animalsRepo.getStats()
     }
   )
 
   ipcMain.handle(
     'get-animal-type-counts',
     async (): Promise<Array<{ name: string; count: number }>> => {
-      return databaseService.getAnimalTypeCounts()
+      return animalsRepo.getTypeCounts()
     }
   )
 
   // Export animals to Excel
   ipcMain.handle('export-animals-excel', async () => {
     try {
-      const animals = await databaseService.getAnimals()
+      const animals = await animalsRepo.getAll()
 
       // Prepare data for worksheet (flatten and map keys)
       const rows = animals.map((a) => ({
