@@ -3,6 +3,7 @@ import * as React from 'react'
 import type { Animal, Gender } from '../../../../../shared/types/models'
 import { Button } from '../../ui/button'
 import { Input } from '../../ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select'
 import {
   Dialog,
   DialogContent,
@@ -23,7 +24,7 @@ import {
 } from '../../ui/drawer'
 import { Label } from '../../ui/label'
 import { toast } from 'sonner'
-import { PawPrint } from 'lucide-react'
+import { PawPrint, Plus } from 'lucide-react'
 import { AnimalsToolbar, AnimalViewDialog, AnimalsTable } from '..'
 import { AnimalTypesModal } from '../AnimalTypesModal'
 
@@ -250,29 +251,33 @@ export const AnimalsPage = forwardRef<AnimalsHandles, unknown>((_, ref): React.R
                 <div className="space-y-2">
                   <Label htmlFor="type_id">Animal Type</Label>
                   <div className="flex space-x-2">
-                    <select
-                      id="type_id"
-                      name="type_id"
-                      value={formData.type_id}
-                      onChange={handleInputChange}
-                      className="flex-1 p-2 border rounded-md"
-                      required
+                    <Select
+                      value={formData.type_id ? formData.type_id.toString() : ''}
+                      onValueChange={(value) => {
+                        setFormData((prev) => ({
+                          ...prev,
+                          type_id: value ? parseInt(value) : 0
+                        }))
+                      }}
                     >
-                      <option value="">Select a type</option>
-                      {animalTypes.map((type) => (
-                        <option key={type.id} value={type.id}>
-                          {type.name}
-                        </option>
-                      ))}
-                    </select>
-                    <Button 
-                      type="button" 
-                      variant="outline" 
-                      size="icon" 
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select a type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {animalTypes.map((type) => (
+                          <SelectItem key={type.id} value={type.id.toString()}>
+                            {type.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
                       onClick={() => setIsTypesModalOpen(true)}
-                      title="Manage animal types"
                     >
-                      <PawPrint className="h-4 w-4" />
+                      <Plus className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
@@ -300,18 +305,25 @@ export const AnimalsPage = forwardRef<AnimalsHandles, unknown>((_, ref): React.R
                 
                 <div className="space-y-2">
                   <Label htmlFor="gender">Gender</Label>
-                  <select
-                    id="gender"
-                    name="gender"
+                  <Select
                     value={formData.gender}
-                    onChange={handleInputChange}
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    onValueChange={(value) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        gender: value as Gender
+                      }))
+                    }
                   >
-                    <option value="MALE">Male</option>
-                    <option value="FEMALE">Female</option>
-                    <option value="CASTRATED">Castrated</option>
-                    <option value="UNKNOWN">Unknown</option>
-                  </select>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select gender" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="MALE">Male</SelectItem>
+                      <SelectItem value="FEMALE">Female</SelectItem>
+                      <SelectItem value="CASTRATED">Castrated</SelectItem>
+                      <SelectItem value="UNKNOWN">Unknown</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 
@@ -393,20 +405,25 @@ export const AnimalsPage = forwardRef<AnimalsHandles, unknown>((_, ref): React.R
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="exitReason">Reason</Label>
-                    <select
-                      id="exitReason"
-                      name="exitReason"
-                      value={formData.exitReason || ''}
-                      onChange={handleInputChange}
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    <Select
+                      value={formData.exitReason}
+                      onValueChange={(value) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          exitReason: value
+                        }))
+                      }
                     >
-                      <option value="">N/A</option>
-                      <option value="ADOPTED">Adopted</option>
-                      <option value="RELEASED">Released</option>
-                      <option value="DECEASED">Deceased</option>
-                      <option value="TRANSFERRED">Transferred</option>
-                      <option value="OTHER">Other</option>
-                    </select>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select a reason" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="SOLD">Sold</SelectItem>
+                        <SelectItem value="DIED">Died</SelectItem>
+                        <SelectItem value="STOLEN">Stolen</SelectItem>
+                        <SelectItem value="OTHER">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
               </div>
