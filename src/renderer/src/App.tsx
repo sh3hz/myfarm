@@ -1,9 +1,9 @@
 import { useEffect, useState, useRef } from 'react'
-import { Navigation } from '@renderer/components/Navigation'
-import { AnimalTypes } from '@renderer/components/AnimalTypes'
-import { Animals } from '@renderer/components/Animals'
-import { SummaryCards } from '@renderer/components/SummaryCards'
-import { AnimalTypePie } from '@renderer/components/AnimalTypePie'
+import { Navigation } from '@renderer/components/layout'
+import { AnimalTypes } from '@renderer/components/animal-types'
+import { Animals } from '@renderer/components/animals'
+import { SummaryCards } from '@renderer/components/dashboard'
+import { AnimalTypePie } from '@renderer/components/dashboard/charts'
 
 function App(): React.JSX.Element {
   

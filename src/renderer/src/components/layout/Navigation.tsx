@@ -7,7 +7,7 @@ import { cn } from '@renderer/lib/utils'
 const navigation = [
   { name: 'Home', href: '/', icon: Home },
   { name: 'Animals', href: '/animals', icon: ScrollText },
-  { name: 'Categories', href: '/settings', icon: Settings },
+  { name: 'Categories', href: '/settings', icon: Settings }
 ]
 
 interface NavigationProps {
@@ -15,10 +15,10 @@ interface NavigationProps {
   onNavigate: (path: string) => void
 }
 
-export function Navigation({ currentPath, onNavigate }: NavigationProps) {
+export function Navigation({ currentPath, onNavigate }: NavigationProps): React.JSX.Element {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
-  const handleNavigation = (path: string) => {
+  const handleNavigation = (path: string): void => {
     onNavigate(path)
     setMobileMenuOpen(false)
   }
@@ -47,7 +47,7 @@ export function Navigation({ currentPath, onNavigate }: NavigationProps) {
                 onClick={() => handleNavigation(item.href)}
                 className={cn(
                   'flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary',
-                  currentPath === item.href ? 'text-primary' : 'text-muted-foreground',
+                  currentPath === item.href ? 'text-primary' : 'text-muted-foreground'
                 )}
               >
                 <Icon className="h-4 w-4" />
@@ -76,7 +76,7 @@ export function Navigation({ currentPath, onNavigate }: NavigationProps) {
                       onClick={() => handleNavigation(item.href)}
                       className={cn(
                         'flex items-center gap-2 text-lg font-medium transition-colors hover:text-primary',
-                        currentPath === item.href ? 'text-primary' : 'text-muted-foreground',
+                        currentPath === item.href ? 'text-primary' : 'text-muted-foreground'
                       )}
                     >
                       <Icon className="h-5 w-5" />
@@ -92,3 +92,5 @@ export function Navigation({ currentPath, onNavigate }: NavigationProps) {
     </header>
   )
 }
+
+export default Navigation

@@ -1,8 +1,8 @@
 import { useState, useEffect, forwardRef } from 'react'
 import * as React from 'react'
-import type { Animal, Gender } from '../../../shared/types/models'
-import { Button } from './ui/button'
-import { Input } from './ui/input'
+import type { Animal, Gender } from '../../../../../shared/types/models'
+import { Button } from '../../ui/button'
+import { Input } from '../../ui/input'
 import {
   Dialog,
   DialogContent,
@@ -10,8 +10,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
-} from './ui/dialog'
+  DialogTrigger
+} from '../../ui/dialog'
 import {
   Drawer,
   DrawerContent,
@@ -19,15 +19,12 @@ import {
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
-  DrawerClose,
-} from './ui/drawer'
-// Table moved to AnimalsTable component
-import { Label } from './ui/label'
+  DrawerClose
+} from '../../ui/drawer'
+import { Label } from '../../ui/label'
 import { toast } from 'sonner'
 import { PawPrint } from 'lucide-react'
-import { AnimalsToolbar } from './animals/AnimalsToolbar'
-import { AnimalViewDialog } from './animals/AnimalViewDialog'
-import { AnimalsTable } from './animals/AnimalsTable'
+import { AnimalsToolbar, AnimalViewDialog, AnimalsTable } from '..'
 
 interface AnimalFormData extends Omit<Animal, 'id' | 'created_at' | 'updated_at' | 'type'> {
   type_id: number
@@ -64,7 +61,7 @@ interface AnimalsHandles {
   openDialog: () => void
 }
 
-export const Animals = forwardRef<AnimalsHandles>((_, ref) => {
+export const AnimalsPage = forwardRef<AnimalsHandles, unknown>((_, ref): React.ReactElement => {
   const [animals, setAnimals] = useState<Animal[]>([])
   const [animalTypes, setAnimalTypes] = useState<{ id: number; name: string }[]>([])
   const [selectedAnimal, setSelectedAnimal] = useState<Animal | null>(null)
@@ -96,7 +93,7 @@ export const Animals = forwardRef<AnimalsHandles>((_, ref) => {
   }, [])
 
   useEffect(() => {
-    const loadImages = async () => {
+    const loadImages = async (): Promise<void> => {
       const paths: Record<string, string> = {}
       for (const animal of animals) {
         if (animal.image) {
@@ -117,13 +114,16 @@ export const Animals = forwardRef<AnimalsHandles>((_, ref) => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>): void => {
     const { name, value } = e.target
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: name === 'age'
-        ? (value === '' ? undefined : Number(value))
-        : name === 'type_id'
-        ? Number(value)
-        : value
+      [name]:
+        name === 'age'
+          ? value === ''
+            ? undefined
+            : Number(value)
+          : name === 'type_id'
+            ? Number(value)
+            : value
     }))
   }
 
@@ -205,9 +205,7 @@ export const Animals = forwardRef<AnimalsHandles>((_, ref) => {
           <DrawerContent className="flex flex-col h-[100dvh] w-full">
             <DrawerHeader>
               <DrawerTitle>{selectedAnimal ? 'Edit Animal' : 'Add New Animal'}</DrawerTitle>
-              <DrawerDescription>
-                Fill in the details for the animal
-              </DrawerDescription>
+              <DrawerDescription>Fill in the details for the animal</DrawerDescription>
             </DrawerHeader>
             <div className="flex-1 overflow-y-auto px-4">
               <form onSubmit={handleSubmit} className="space-y-4 mt-4" id="animal-form">
@@ -254,8 +252,10 @@ export const Animals = forwardRef<AnimalsHandles>((_, ref) => {
                       className="w-full rounded-md border border-input bg-background px-3 py-2"
                     >
                       <option value="">Select a type</option>
-                      {animalTypes.map(type => (
-                        <option key={type.id} value={type.id}>{type.name}</option>
+                      {animalTypes.map((type) => (
+                        <option key={type.id} value={type.id}>
+                          {type.name}
+                        </option>
                       ))}
                     </select>
                   </div>
@@ -422,11 +422,11 @@ export const Animals = forwardRef<AnimalsHandles>((_, ref) => {
                               const imageData = e.target?.result as string
                               const savedPath = await window.api.saveImage(imageData)
                               const fullPath = await window.api.getImagePath(savedPath)
-                              setImagePaths(prev => ({
+                              setImagePaths((prev) => ({
                                 ...prev,
                                 [savedPath]: fullPath
                               }))
-                              setFormData(prev => ({
+                              setFormData((prev) => ({
                                 ...prev,
                                 image: savedPath
                               }))
@@ -509,4 +509,4 @@ export const Animals = forwardRef<AnimalsHandles>((_, ref) => {
   )
 })
 
-Animals.displayName = 'Animals'
+AnimalsPage.displayName = 'AnimalsPage'

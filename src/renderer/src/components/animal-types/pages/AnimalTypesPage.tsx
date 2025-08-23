@@ -45,7 +45,7 @@ interface AnimalTypesHandles {
   openDialog: () => void
 }
 
-export const AnimalTypes = forwardRef<AnimalTypesHandles>((_, ref) => {
+export const AnimalTypesPage = forwardRef<AnimalTypesHandles>((_, ref) => {
   const [animalTypes, setAnimalTypes] = useState<AnimalType[]>([])
   const [selectedType, setSelectedType] = useState<AnimalType | null>(null)
   const [addOpen, setAddOpen] = useState(false)
@@ -255,4 +255,4 @@ export const AnimalTypes = forwardRef<AnimalTypesHandles>((_, ref) => {
   )
 })
 
-AnimalTypes.displayName = 'AnimalTypes'
+AnimalTypesPage.displayName = 'AnimalTypesPage'

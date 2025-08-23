@@ -1,0 +1,5 @@
+export { AnimalAvatar } from './AnimalAvatar'
+export { AnimalsToolbar } from './AnimalsToolbar'
+export { AnimalsTable } from './AnimalsTable'
+export { AnimalViewDialog } from './AnimalViewDialog'
+export { AnimalsPage as Animals } from './pages/AnimalsPage'
