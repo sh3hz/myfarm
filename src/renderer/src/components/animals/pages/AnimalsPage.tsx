@@ -83,6 +83,31 @@ export const AnimalsPage = forwardRef<AnimalsHandles, unknown>((_, ref): React.R
     try {
       const fetchedAnimals = await window.api.getAnimals()
       setAnimals(fetchedAnimals)
+
+      // Load image paths for animals that have images
+      const imagePromises = fetchedAnimals
+        .filter(animal => animal.image)
+        .map(async (animal) => {
+          try {
+            const fullPath = await window.api.getImagePath(animal.image!)
+            return { imagePath: animal.image!, fullPath }
+          } catch (error) {
+            console.error(`Failed to load image for animal ${animal.name}:`, error)
+            return null
+          }
+        })
+
+      const resolvedImages = await Promise.all(imagePromises)
+      const imageMap = resolvedImages
+        .filter(Boolean)
+        .reduce((acc, item) => {
+          if (item) {
+            acc[item.imagePath] = item.fullPath
+          }
+          return acc
+        }, {} as Record<string, string>)
+
+      setImages(prev => ({ ...prev, ...imageMap }))
     } catch (error) {
       console.error('Failed to load animals:', error)
       toast.error('Failed to load animals')
@@ -104,15 +129,29 @@ export const AnimalsPage = forwardRef<AnimalsHandles, unknown>((_, ref): React.R
     loadAnimalTypes()
   }, [loadAnimals, loadAnimalTypes])
 
-  const handleEdit = useCallback((animal: Animal): void => {
+  const handleEdit = useCallback(async (animal: Animal): Promise<void> => {
     setSelectedAnimal(animal)
     setFormData({
       ...animal,
       type_id: animal.type?.id || 0, // Add null check for type
       image: animal.image || ''
     } as AnimalFormData)
+
+    // Load image path if animal has an image and it's not already loaded
+    if (animal.image && !images[animal.image]) {
+      try {
+        const fullPath = await window.api.getImagePath(animal.image)
+        setImages(prev => ({
+          ...prev,
+          [animal.image!]: fullPath
+        }))
+      } catch (error) {
+        console.error('Failed to load image for editing:', error)
+      }
+    }
+
     setDrawerOpen(true)
-  }, [])
+  }, [images])
 
   const handleTypeSelect = (typeId: number): void => {
     setFormData((prev) => ({
@@ -139,7 +178,7 @@ export const AnimalsPage = forwardRef<AnimalsHandles, unknown>((_, ref): React.R
           ...formData,
           type: typeName
         }
-        
+
         if (selectedAnimal) {
           await window.api.updateAnimal(selectedAnimal.id, animalData)
           toast.success('Animal updated successfully')
@@ -147,7 +186,7 @@ export const AnimalsPage = forwardRef<AnimalsHandles, unknown>((_, ref): React.R
           await window.api.createAnimal(animalData)
           toast.success('Animal created successfully')
         }
-        
+
         await loadAnimals()
         setDrawerOpen(false)
       } catch (error) {
@@ -161,7 +200,7 @@ export const AnimalsPage = forwardRef<AnimalsHandles, unknown>((_, ref): React.R
   const handleDelete = useCallback(
     async (id: number): Promise<void> => {
       if (!window.confirm('Are you sure you want to delete this animal?')) return
-      
+
       try {
         await window.api.deleteAnimal(id)
         await loadAnimals()
@@ -302,7 +341,7 @@ export const AnimalsPage = forwardRef<AnimalsHandles, unknown>((_, ref): React.R
                     onChange={handleInputChange}
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="gender">Gender</Label>
                   <Select
@@ -338,7 +377,7 @@ export const AnimalsPage = forwardRef<AnimalsHandles, unknown>((_, ref): React.R
                     onChange={handleInputChange}
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="weight">Weight (kg)</Label>
                   <Input
@@ -350,7 +389,7 @@ export const AnimalsPage = forwardRef<AnimalsHandles, unknown>((_, ref): React.R
                     onChange={handleInputChange}
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="height">Height (cm)</Label>
                   <Input
@@ -525,13 +564,14 @@ export const AnimalsPage = forwardRef<AnimalsHandles, unknown>((_, ref): React.R
           open={isDialogOpen}
           onOpenChange={setIsDialogOpen}
           animal={selectedAnimal}
+          imageSrc={selectedAnimal.image ? images[selectedAnimal.image] : undefined}
           onDeleteClick={handleDelete}
-          onEditClick={handleEdit}
+          onEditClick={(animal) => handleEdit(animal)}
         />
       )}
-      
-      <AnimalTypesModal 
-        open={isTypesModalOpen} 
+
+      <AnimalTypesModal
+        open={isTypesModalOpen}
         onOpenChange={setIsTypesModalOpen}
         onTypeSelect={handleTypeSelect}
         onTypeAdded={loadAnimalTypes}
@@ -544,7 +584,7 @@ export const AnimalsPage = forwardRef<AnimalsHandles, unknown>((_, ref): React.R
             setSelectedAnimal(animal)
             setIsDialogOpen(true)
           }}
-          onEdit={handleEdit}
+          onEdit={(animal) => handleEdit(animal)}
         />
       </div>
     </div>
