@@ -169,6 +169,13 @@ export const AnimalsPage = forwardRef<AnimalsHandles, unknown>((_, ref): React.R
   const handleSubmit = useCallback(
     async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
       e.preventDefault()
+
+      // Validate required fields
+      if (!formData.type_id || formData.type_id === 0) {
+        toast.error('Please select an animal type')
+        return
+      }
+
       try {
         const typeName = animalTypes.find((type) => type.id === formData.type_id)?.name || ''
         const animalData = {
@@ -291,9 +298,17 @@ export const AnimalsPage = forwardRef<AnimalsHandles, unknown>((_, ref): React.R
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="type_id">Animal Type</Label>
+                  <Label htmlFor="type_id">Animal Type *</Label>
                   <div className="flex space-x-2">
-                    <Select required
+                    {/* Hidden input for HTML5 validation */}
+                    <input
+                      type="hidden"
+                      name="type_id"
+                      value={formData.type_id || ''}
+                      required
+                      onChange={() => { }} // Controlled by Select component
+                    />
+                    <Select
                       value={formData.type_id ? formData.type_id.toString() : ''}
                       onValueChange={(value) => {
                         setFormData((prev) => ({
@@ -554,12 +569,12 @@ export const AnimalsPage = forwardRef<AnimalsHandles, unknown>((_, ref): React.R
                             })
 
                             const savedFilenames = await Promise.all(uploadPromises)
-                            
+
                             setFormData((prev) => ({
                               ...prev,
                               documents: [...(prev.documents || []), ...savedFilenames]
                             }))
-                            
+
                             toast.success(`${files.length} document(s) added`)
                           } catch (error) {
                             toast.error('Error uploading documents')
@@ -573,10 +588,10 @@ export const AnimalsPage = forwardRef<AnimalsHandles, unknown>((_, ref): React.R
                     <div className="flex flex-wrap gap-1 max-w-full">
                       {formData.documents.map((doc, index) => {
                         const displayName = doc.replace(/_\d+(\.[^.]+)?$/, '$1')
-                        const truncatedName = displayName.length > 25 
-                          ? `${displayName.substring(0, 22)}...` 
+                        const truncatedName = displayName.length > 25
+                          ? `${displayName.substring(0, 22)}...`
                           : displayName
-                        
+
                         return (
                           <span
                             key={index}
