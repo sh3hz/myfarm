@@ -1,4 +1,4 @@
-import { ipcMain, app, nativeImage } from 'electron'
+import { ipcMain, app, protocol } from 'electron'
 import path from 'path'
 import fs from 'fs'
 import { v4 as uuidv4 } from 'uuid'
@@ -11,6 +11,25 @@ if (!fs.existsSync(UPLOADS_DIR)) {
 }
 
 export function registerFileHandlers() {
+  // Register custom protocol for serving images
+  protocol.registerFileProtocol('app-image', (request, callback) => {
+    try {
+      // Extract the relative path from the URL
+      const relativePath = request.url.replace('app-image://', '')
+      const fullPath = path.join(app.getPath('userData'), relativePath)
+      
+      // Verify file exists and is within uploads directory for security
+      if (fs.existsSync(fullPath) && fullPath.startsWith(UPLOADS_DIR)) {
+        callback({ path: fullPath })
+      } else {
+        console.error('Image file not found or access denied:', fullPath)
+        callback({ error: -6 }) // FILE_NOT_FOUND
+      }
+    } catch (error) {
+      console.error('Error serving image:', error)
+      callback({ error: -2 }) // FAILED
+    }
+  })
   ipcMain.handle('save-image', async (_, imageData: string) => {
     try {
       // Extract base64 data
@@ -32,6 +51,31 @@ export function registerFileHandlers() {
     }
   })
 
+  // Batch load multiple image paths for better performance
+  ipcMain.handle('get-image-paths', (_, relativePaths: string[]) => {
+    try {
+      const results: Record<string, string> = {}
+      
+      for (const relativePath of relativePaths) {
+        if (!relativePath) continue
+        
+        const fullPath = path.join(app.getPath('userData'), relativePath)
+        
+        // Verify the file exists
+        if (fs.existsSync(fullPath)) {
+          results[relativePath] = `app-image://${relativePath}`
+        } else {
+          console.warn('Image file not found:', fullPath)
+        }
+      }
+      
+      return results
+    } catch (error) {
+      console.error('Error getting image paths:', error)
+      return {}
+    }
+  })
+
   ipcMain.handle('get-image-path', (_, relativePath: string) => {
     try {
       if (!relativePath) return ''
@@ -43,10 +87,8 @@ export function registerFileHandlers() {
         return ''
       }
 
-      // Read the image file and convert to base64
-      const img = nativeImage.createFromPath(fullPath)
-      const dataURL = img.toDataURL()
-      return dataURL
+      // Return custom protocol URL for secure access
+      return `app-image://${relativePath}`
     } catch (error) {
       console.error('Error getting image path:', error)
       return ''

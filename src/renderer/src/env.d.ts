@@ -29,6 +29,7 @@ interface Window {
     deleteAnimal: (id: number) => Promise<void>
     saveImage: (imageData: string) => Promise<string>
     getImagePath: (relativePath: string) => Promise<string>
+    getImagePaths: (relativePaths: string[]) => Promise<Record<string, string>>
     getAnimalStats: () => Promise<any>
     exportAnimalsToExcel: () => Promise<{ success: boolean; filePath?: string; message?: string }>
     getAnimalTypeCounts: () => Promise<Array<{ name: string; count: number }>>

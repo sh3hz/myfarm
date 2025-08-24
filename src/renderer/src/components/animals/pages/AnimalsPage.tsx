@@ -63,6 +63,14 @@ interface AnimalsHandles {
   openDialog: () => void
 }
 
+// Global image cache to persist across page navigations
+const globalImageCache = new Map<string, string>()
+
+// Helper function to get image URL (cache-first)
+const getImageUrl = (imagePath: string): string | undefined => {
+  return globalImageCache.get(imagePath)
+}
+
 export const AnimalsPage = forwardRef<AnimalsHandles, unknown>((_, ref): React.ReactElement => {
   const [animals, setAnimals] = useState<Animal[]>([])
   const [animalTypes, setAnimalTypes] = useState<{ id: number; name: string }[]>([])
@@ -71,7 +79,7 @@ export const AnimalsPage = forwardRef<AnimalsHandles, unknown>((_, ref): React.R
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [isTypesModalOpen, setIsTypesModalOpen] = useState(false)
   const [formData, setFormData] = useState<AnimalFormData>({ ...defaultAnimal })
-  const [images, setImages] = useState<Record<string, string>>({})
+  const [, forceUpdate] = useState({})
 
   React.useImperativeHandle(ref, () => ({
     openDialog: (): void => {
@@ -84,30 +92,27 @@ export const AnimalsPage = forwardRef<AnimalsHandles, unknown>((_, ref): React.R
       const fetchedAnimals = await window.api.getAnimals()
       setAnimals(fetchedAnimals)
 
-      // Load image paths for animals that have images
-      const imagePromises = fetchedAnimals
-        .filter(animal => animal.image)
-        .map(async (animal) => {
-          try {
-            const fullPath = await window.api.getImagePath(animal.image!)
-            return { imagePath: animal.image!, fullPath }
-          } catch (error) {
-            console.error(`Failed to load image for animal ${animal.name}:`, error)
-            return null
-          }
-        })
+      // Get image paths that need loading (not in cache)
+      const imagePaths = fetchedAnimals
+        .filter(animal => animal.image && !globalImageCache.has(animal.image))
+        .map(animal => animal.image!)
 
-      const resolvedImages = await Promise.all(imagePromises)
-      const imageMap = resolvedImages
-        .filter(Boolean)
-        .reduce((acc, item) => {
-          if (item) {
-            acc[item.imagePath] = item.fullPath
-          }
-          return acc
-        }, {} as Record<string, string>)
+      if (imagePaths.length > 0) {
+        try {
+          // Batch load all image paths at once
+          const imageMap = await window.api.getImagePaths(imagePaths)
 
-      setImages(prev => ({ ...prev, ...imageMap }))
+          // Update global cache
+          Object.entries(imageMap).forEach(([path, url]) => {
+            globalImageCache.set(path, url as string)
+          })
+
+          // Force re-render to show loaded images
+          forceUpdate({})
+        } catch (error) {
+          console.error('Failed to load image paths:', error)
+        }
+      }
     } catch (error) {
       console.error('Failed to load animals:', error)
       toast.error('Failed to load animals')
@@ -137,21 +142,19 @@ export const AnimalsPage = forwardRef<AnimalsHandles, unknown>((_, ref): React.R
       image: animal.image || ''
     } as AnimalFormData)
 
-    // Load image path if animal has an image and it's not already loaded
-    if (animal.image && !images[animal.image]) {
+    // Load image path if animal has an image and it's not in cache
+    if (animal.image && !globalImageCache.has(animal.image)) {
       try {
         const fullPath = await window.api.getImagePath(animal.image)
-        setImages(prev => ({
-          ...prev,
-          [animal.image!]: fullPath
-        }))
+        globalImageCache.set(animal.image, fullPath)
+        forceUpdate({})
       } catch (error) {
         console.error('Failed to load image for editing:', error)
       }
     }
 
     setDrawerOpen(true)
-  }, [images])
+  }, [])
 
   const handleTypeSelect = (typeId: number): void => {
     setFormData((prev) => ({
@@ -470,9 +473,9 @@ export const AnimalsPage = forwardRef<AnimalsHandles, unknown>((_, ref): React.R
                 <Label htmlFor="image">Image</Label>
                 <div className="flex items-center space-x-2">
                   <div className="relative w-16 h-16 rounded-full bg-muted flex items-center justify-center">
-                    {formData.image && images[formData.image] ? (
+                    {formData.image && getImageUrl(formData.image) ? (
                       <img
-                        src={images[formData.image]}
+                        src={getImageUrl(formData.image)}
                         alt="Preview"
                         className="object-cover w-full h-full"
                       />
@@ -495,10 +498,10 @@ export const AnimalsPage = forwardRef<AnimalsHandles, unknown>((_, ref): React.R
                             const imageData = e.target?.result as string
                             const savedPath = await window.api.saveImage(imageData)
                             const fullPath = await window.api.getImagePath(savedPath)
-                            setImages((prev) => ({
-                              ...prev,
-                              [savedPath]: fullPath
-                            }))
+
+                            // Update global cache
+                            globalImageCache.set(savedPath, fullPath)
+                            forceUpdate({})
                             setFormData((prev) => ({
                               ...prev,
                               image: savedPath
@@ -564,7 +567,7 @@ export const AnimalsPage = forwardRef<AnimalsHandles, unknown>((_, ref): React.R
           open={isDialogOpen}
           onOpenChange={setIsDialogOpen}
           animal={selectedAnimal}
-          imageSrc={selectedAnimal.image ? images[selectedAnimal.image] : undefined}
+          imageSrc={selectedAnimal.image ? getImageUrl(selectedAnimal.image) : undefined}
           onDeleteClick={handleDelete}
           onEditClick={(animal) => handleEdit(animal)}
         />
@@ -579,7 +582,7 @@ export const AnimalsPage = forwardRef<AnimalsHandles, unknown>((_, ref): React.R
       <div className="mt-6">
         <AnimalsTable
           animals={animals}
-          imagePaths={images}
+          imagePaths={Object.fromEntries(globalImageCache.entries())}
           onView={(animal) => {
             setSelectedAnimal(animal)
             setIsDialogOpen(true)

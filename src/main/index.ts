@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, protocol } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
@@ -6,6 +6,19 @@ import { databaseService } from './database'
 import { registerAnimalTypeHandlers } from './handlers/animalTypes'
 import { registerAnimalHandlers } from './handlers/animals'
 import { registerFileHandlers } from './handlers/files'
+
+// Register protocol schemes before app is ready
+protocol.registerSchemesAsPrivileged([
+  {
+    scheme: 'app-image',
+    privileges: {
+      standard: true,
+      secure: true,
+      supportFetchAPI: true,
+      corsEnabled: true
+    }
+  }
+])
 
 function createWindow(): void {
   // Create the browser window.

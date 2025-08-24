@@ -15,14 +15,15 @@ const api = {
   // Animals API
   getAnimals: () => ipcRenderer.invoke('get-animals'),
   getAnimal: (id: number) => ipcRenderer.invoke('get-animal', id),
-  createAnimal: (data) => ipcRenderer.invoke('create-animal', data),
-  updateAnimal: (id: number, data) => ipcRenderer.invoke('update-animal', id, data),
+  createAnimal: (data: any) => ipcRenderer.invoke('create-animal', data),
+  updateAnimal: (id: number, data: any) => ipcRenderer.invoke('update-animal', id, data),
   deleteAnimal: (id: number) => ipcRenderer.invoke('delete-animal', id),
   exportAnimalsToExcel: () => ipcRenderer.invoke('export-animals-excel'),
 
   // File handling API
   saveImage: (imageData: string) => ipcRenderer.invoke('save-image', imageData),
   getImagePath: (relativePath: string) => ipcRenderer.invoke('get-image-path', relativePath),
+  getImagePaths: (relativePaths: string[]) => ipcRenderer.invoke('get-image-paths', relativePaths),
   
   // Statistics API
   getAnimalStats: () => ipcRenderer.invoke('get-animal-stats'),
