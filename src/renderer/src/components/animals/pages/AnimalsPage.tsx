@@ -293,7 +293,7 @@ export const AnimalsPage = forwardRef<AnimalsHandles, unknown>((_, ref): React.R
                 <div className="space-y-2">
                   <Label htmlFor="type_id">Animal Type</Label>
                   <div className="flex space-x-2">
-                    <Select
+                    <Select required
                       value={formData.type_id ? formData.type_id.toString() : ''}
                       onValueChange={(value) => {
                         setFormData((prev) => ({

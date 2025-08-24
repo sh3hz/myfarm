@@ -7,6 +7,7 @@ import { registerAnimalTypeHandlers } from './handlers/animalTypes'
 import { registerAnimalHandlers } from './handlers/animals'
 import { registerFileHandlers } from './handlers/files'
 import { registerDocumentHandlers } from './handlers/documents'
+import { registerCashflowHandlers } from './handlers/cashflow'
 
 // Register protocol schemes before app is ready
 protocol.registerSchemesAsPrivileged([
@@ -75,6 +76,7 @@ app.whenReady().then(() => {
   registerAnimalHandlers()
   registerFileHandlers()
   registerDocumentHandlers()
+  registerCashflowHandlers()
 
   ipcMain.handle('get-app-info', async () => {
     try {

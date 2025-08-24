@@ -3,6 +3,7 @@ import { Navigation } from '@renderer/components/layout'
 import { Animals } from '@renderer/components/animals'
 import { SummaryCards } from '@renderer/components/dashboard'
 import { AnimalTypePie } from '@renderer/components/dashboard/charts'
+import { CashflowPage } from '@renderer/components/cashflow'
 import { Toaster } from '@renderer/components/ui/sonner'
 
 function App(): React.JSX.Element {
@@ -44,6 +45,8 @@ function App(): React.JSX.Element {
         )
       case '/animals':
         return <Animals ref={animalsRef} />
+      case '/cashflow':
+        return <CashflowPage />
       default:
         return null
     }

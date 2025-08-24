@@ -51,4 +51,23 @@ export interface Animal {
   type?: AnimalType
 }
 
+export type TransactionType = 'income' | 'expense'
+
+export interface Transaction {
+  id: number
+  type: TransactionType
+  name: string
+  amount: number
+  date: string
+  created_at: string
+  updated_at: string
+}
+
+export interface CashflowSummary {
+  totalIncome: number
+  totalExpense: number
+  balance: number
+  transactionCount: number
+}
+
 export type SqliteDatabase = Database.Database

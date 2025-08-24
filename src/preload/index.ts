@@ -38,7 +38,20 @@ const api = {
   
   // Statistics API
   getAnimalStats: () => ipcRenderer.invoke('get-animal-stats'),
-  getAnimalTypeCounts: () => ipcRenderer.invoke('get-animal-type-counts')
+  getAnimalTypeCounts: () => ipcRenderer.invoke('get-animal-type-counts'),
+
+  // Cashflow API
+  getTransactions: () => ipcRenderer.invoke('get-transactions'),
+  getTransaction: (id: number) => ipcRenderer.invoke('get-transaction', id),
+  createTransaction: (data: any) => ipcRenderer.invoke('create-transaction', data),
+  updateTransaction: (id: number, data: any) => ipcRenderer.invoke('update-transaction', id, data),
+  deleteTransaction: (id: number) => ipcRenderer.invoke('delete-transaction', id),
+  getCashflowSummary: () => ipcRenderer.invoke('get-cashflow-summary'),
+  getTransactionsByDateRange: (startDate: string, endDate: string) => 
+    ipcRenderer.invoke('get-transactions-by-date-range', startDate, endDate),
+  getTransactionsByType: (type: string) => ipcRenderer.invoke('get-transactions-by-type', type),
+  getMonthlyStats: (year: number) => ipcRenderer.invoke('get-monthly-stats', year),
+  exportTransactionsToExcel: () => ipcRenderer.invoke('export-transactions-excel')
 }
 
 // Expose protected methods that allow the renderer process to use

@@ -69,6 +69,24 @@ export function initDatabase(db: Database.Database): void {
       )
     `)
 
+  // Create transactions table if it doesn't exist
+  db.exec(`
+      CREATE TABLE IF NOT EXISTS transactions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        type TEXT NOT NULL CHECK(type IN ('income', 'expense')),
+        name TEXT NOT NULL,
+        amount REAL NOT NULL CHECK(amount > 0),
+        date TEXT NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `)
+
+  // Index for transaction lookups by type and date
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_transactions_type ON transactions(type)`)
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_transactions_date ON transactions(date)`)
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_transactions_type_date ON transactions(type, date)`)
+
   // Insert default app info atomically if table is empty
   db.prepare(
     `

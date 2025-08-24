@@ -5,6 +5,30 @@ declare module '*.svg' {
   export default content
 }
 
+interface Transaction {
+  id: number
+  type: 'income' | 'expense'
+  name: string
+  amount: number
+  date: string
+  created_at: string
+  updated_at: string
+}
+
+interface CashflowSummary {
+  totalIncome: number
+  totalExpense: number
+  balance: number
+  transactionCount: number
+}
+
+interface MonthlyStats {
+  month: number
+  income: number
+  expense: number
+  balance: number
+}
+
 interface Window {
   electron: {
     process: {
@@ -39,5 +63,17 @@ interface Window {
     saveDocument: (fileData: string, originalName: string) => Promise<string>
     getDocumentPath: (filename: string) => Promise<string>
     openDocument: (filename: string) => Promise<void>
+    
+    // Cashflow API
+    getTransactions: () => Promise<Transaction[]>
+    getTransaction: (id: number) => Promise<Transaction | null>
+    createTransaction: (data: Omit<Transaction, 'id' | 'created_at' | 'updated_at'>) => Promise<number>
+    updateTransaction: (id: number, data: Partial<Omit<Transaction, 'id' | 'created_at' | 'updated_at'>>) => Promise<Transaction | undefined>
+    deleteTransaction: (id: number) => Promise<number>
+    getCashflowSummary: () => Promise<CashflowSummary>
+    getTransactionsByDateRange: (startDate: string, endDate: string) => Promise<Transaction[]>
+    getTransactionsByType: (type: 'income' | 'expense') => Promise<Transaction[]>
+    getMonthlyStats: (year: number) => Promise<MonthlyStats[]>
+    exportTransactionsToExcel: () => Promise<{ success: boolean; filePath?: string; message?: string }>
   }
 }
