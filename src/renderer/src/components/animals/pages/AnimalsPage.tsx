@@ -202,8 +202,6 @@ export const AnimalsPage = forwardRef<AnimalsHandles, unknown>((_, ref): React.R
 
   const handleDelete = useCallback(
     async (id: number): Promise<void> => {
-      if (!window.confirm('Are you sure you want to delete this animal?')) return
-
       try {
         await window.api.deleteAnimal(id)
         await loadAnimals()
@@ -212,6 +210,7 @@ export const AnimalsPage = forwardRef<AnimalsHandles, unknown>((_, ref): React.R
           setSelectedAnimal(null)
           setIsDialogOpen(false)
         }
+        setDrawerOpen(false)
       } catch (error) {
         console.error('Error deleting animal:', error)
         toast.error('Failed to delete animal')

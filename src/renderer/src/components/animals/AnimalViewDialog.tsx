@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '../ui/dialog'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '../ui/dialog'
 import { Button } from '../ui/button'
 import type { Animal } from '../../../../shared/types/models'
 import { PawPrint } from 'lucide-react'
@@ -99,13 +99,33 @@ export function AnimalViewDialog({
         </div>
         <DialogFooter className="gap-2">
           {onDeleteClick && animal && (
-            <Button 
-              variant="destructive" 
-              onClick={() => onDeleteClick(animal.id)}
-              className="mr-auto"
-            >
-              Delete
-            </Button>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="destructive" className="mr-auto">
+                  Delete
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Are you sure you want to delete this animal?</DialogTitle>
+                  <DialogDescription>
+                    This action cannot be undone. This will permanently delete {animal.name}.
+                  </DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                  <Button variant="outline" type="button">
+                    Cancel
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    type="button"
+                    onClick={() => onDeleteClick(animal.id)}
+                  >
+                    Delete
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           )}
           {onEditClick && animal && (
             <Button 

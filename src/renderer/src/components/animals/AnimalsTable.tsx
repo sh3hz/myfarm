@@ -18,7 +18,7 @@ export function AnimalsTable({ animals, imagePaths, onView, onEdit }: Props): Re
         <TableRow>
           <TableHead>Image</TableHead>
           <TableHead>Name</TableHead>
-          <TableHead>ID</TableHead>
+          <TableHead>Tag</TableHead>
           <TableHead>Breed</TableHead>
           <TableHead>Gender</TableHead>
           <TableHead>Age</TableHead>
@@ -39,8 +39,8 @@ export function AnimalsTable({ animals, imagePaths, onView, onEdit }: Props): Re
             <TableCell>{animal.breed || '-'}</TableCell>
             <TableCell>
               {animal.gender === 'MALE' ? '♂' :
-               animal.gender === 'FEMALE' ? '♀' :
-               animal.gender === 'CASTRATED' ? '♂ (N)' : '?'}
+                animal.gender === 'FEMALE' ? '♀' :
+                  animal.gender === 'CASTRATED' ? '♂ (N)' : '?'}
             </TableCell>
             <TableCell>{animal.age && animal.age > 0 ? `${animal.age} yrs` : '-'}</TableCell>
             <TableCell>{animal.type?.name}</TableCell>
