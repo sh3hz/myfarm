@@ -24,14 +24,15 @@ export function AnimalViewDialog({
 }: Props): ReactElement {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+      <DialogContent className="max-w-4xl max-h-[95vh] w-[95vw] sm:w-[90vw] overflow-hidden flex flex-col">
         <DialogHeader className="flex-shrink-0">
           <DialogTitle className="text-lg sm:text-xl truncate">{animal?.name}</DialogTitle>
         </DialogHeader>
         <div className="flex-1 overflow-y-auto">
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 p-1">
-            <div className="space-y-3">
-              <div className="relative w-full aspect-square max-w-sm mx-auto lg:max-w-none rounded-lg bg-muted overflow-hidden flex items-center justify-center">
+          <div className="space-y-4 p-2">
+            {/* Image Section */}
+            <div className="flex justify-center">
+              <div className="relative w-full aspect-square max-w-48 sm:max-w-56 rounded-lg bg-muted overflow-hidden flex items-center justify-center">
                 {imageSrc ? (
                   <img
                     src={imageSrc}
@@ -42,27 +43,28 @@ export function AnimalViewDialog({
                   <PawPrint className="w-16 h-16 sm:w-20 sm:h-20 text-muted-foreground" />
                 )}
               </div>
-              <div className="text-sm text-muted-foreground break-words">
-                {animal?.description || 'No description provided.'}
-              </div>
             </div>
 
-            <div className="space-y-3 text-sm min-w-0">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                <div className="flex justify-between">
+            {/* Description */}
+            <div className="text-sm text-muted-foreground break-words text-center">
+              {animal?.description || 'No description provided.'}
+            </div>
+
+            {/* Animal Details */}
+            <div className="space-y-4 text-sm">
+              {/* Basic Info Grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                <div className="flex flex-col space-y-1">
                   <span className="text-muted-foreground font-medium">Tag:</span>
-                  <span className="truncate ml-2">{animal?.tagNumber || '-'}</span>
+                  <span className="break-words">{animal?.tagNumber || '-'}</span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex flex-col space-y-1">
                   <span className="text-muted-foreground font-medium">Breed:</span>
-                  <span className="truncate ml-2">{animal?.breed || '-'}</span>
+                  <span className="break-words">{animal?.breed || '-'}</span>
                 </div>
-              </div>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                <div className="flex justify-between">
+                <div className="flex flex-col space-y-1">
                   <span className="text-muted-foreground font-medium">Gender:</span>
-                  <span className="ml-2">
+                  <span className="break-words">
                     {animal
                       ? animal.gender === 'MALE'
                         ? 'Male'
@@ -74,58 +76,60 @@ export function AnimalViewDialog({
                       : '-'}
                   </span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex flex-col space-y-1">
                   <span className="text-muted-foreground font-medium">Age:</span>
-                  <span className="ml-2">{animal?.age && animal.age > 0 ? `${animal.age} yrs` : '-'}</span>
+                  <span className="break-words">{animal?.age && animal.age > 0 ? `${animal.age} yrs` : '-'}</span>
                 </div>
               </div>
               
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                <div className="flex justify-between">
+              {/* Secondary Info Grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                <div className="flex flex-col space-y-1">
                   <span className="text-muted-foreground font-medium">Type:</span>
-                  <span className="truncate ml-2">{animal?.type?.name || '-'}</span>
+                  <span className="break-words">{animal?.type?.name || '-'}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground font-medium">DOB:</span>
-                  <span className="ml-2">
+                <div className="flex flex-col space-y-1">
+                  <span className="text-muted-foreground font-medium">Date of Birth:</span>
+                  <span className="break-words">
                     {animal?.dateOfBirth ? new Date(animal.dateOfBirth).toLocaleDateString() : '-'}
                   </span>
                 </div>
-              </div>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                <div className="flex justify-between">
+                <div className="flex flex-col space-y-1">
                   <span className="text-muted-foreground font-medium">Weight:</span>
-                  <span className="ml-2">{animal?.weight ? `${animal.weight} kg` : '-'}</span>
+                  <span className="break-words">{animal?.weight ? `${animal.weight} kg` : '-'}</span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex flex-col space-y-1">
                   <span className="text-muted-foreground font-medium">Height:</span>
-                  <span className="ml-2">{animal?.height ? `${animal.height} cm` : '-'}</span>
+                  <span className="break-words">{animal?.height ? `${animal.height} cm` : '-'}</span>
                 </div>
               </div>
               
-              <div className="space-y-1">
-                <div className="flex flex-col sm:flex-row sm:justify-between">
-                  <span className="text-muted-foreground font-medium">Acquired:</span>
-                  <div className="sm:ml-2 sm:text-right">
-                    <div>{animal?.acquisitionDate ? new Date(animal.acquisitionDate).toLocaleDateString() : '-'}</div>
-                    {animal?.acquisitionLocation && (
-                      <div className="text-xs text-muted-foreground truncate">({animal.acquisitionLocation})</div>
-                    )}
-                  </div>
+              {/* Acquisition Info */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="flex flex-col space-y-1">
+                  <span className="text-muted-foreground font-medium">Acquisition Date:</span>
+                  <span className="break-words">{animal?.acquisitionDate ? new Date(animal.acquisitionDate).toLocaleDateString() : '-'}</span>
                 </div>
+                {animal?.acquisitionLocation && (
+                  <div className="flex flex-col space-y-1">
+                    <span className="text-muted-foreground font-medium">Acquisition Location:</span>
+                    <span className="break-words">{animal.acquisitionLocation}</span>
+                  </div>
+                )}
               </div>
               
-              <div className="space-y-1">
-                <div className="flex flex-col sm:flex-row sm:justify-between">
-                  <span className="text-muted-foreground font-medium">Exit:</span>
-                  <div className="sm:ml-2 sm:text-right">
-                    <div>{animal?.exitDate ? new Date(animal.exitDate).toLocaleDateString() : '-'}</div>
-                    {animal?.exitReason && (
-                      <div className="text-xs text-muted-foreground">({animal.exitReason})</div>
-                    )}
-                  </div>
+              {/* Exit Info */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="flex flex-col space-y-1">
+                  <span className="text-muted-foreground font-medium">Exit Date:</span>
+                  <span className="break-words">{animal?.exitDate ? new Date(animal.exitDate).toLocaleDateString() : '-'}</span>
                 </div>
+                {animal?.exitReason && (
+                  <div className="flex flex-col space-y-1">
+                    <span className="text-muted-foreground font-medium">Exit Reason:</span>
+                    <span className="break-words">{animal.exitReason}</span>
+                  </div>
+                )}
               </div>
               
               {animal?.documents && animal.documents.length > 0 && (
