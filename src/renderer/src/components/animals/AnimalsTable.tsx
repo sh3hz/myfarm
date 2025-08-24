@@ -1,6 +1,5 @@
 import type { Animal } from '../../../../shared/types/models'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
-import { Button } from '../ui/button'
 import { AnimalAvatar } from './AnimalAvatar'
 import type { ReactElement } from 'react'
 
@@ -8,10 +7,9 @@ interface Props {
   animals: Animal[]
   imagePaths: Record<string, string>
   onView: (animal: Animal) => void
-  onEdit: (animal: Animal) => void
 }
 
-export function AnimalsTable({ animals, imagePaths, onView, onEdit }: Props): ReactElement {
+export function AnimalsTable({ animals, imagePaths, onView }: Props): ReactElement {
   return (
     <Table>
       <TableHeader>
@@ -25,12 +23,15 @@ export function AnimalsTable({ animals, imagePaths, onView, onEdit }: Props): Re
           <TableHead>Type</TableHead>
           <TableHead>DOB</TableHead>
           <TableHead>Weight (kg)</TableHead>
-          <TableHead>Actions</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {animals.map((animal) => (
-          <TableRow key={animal.id}>
+          <TableRow
+            key={animal.id}
+            className="cursor-pointer hover:bg-muted/50 transition-colors"
+            onClick={() => onView(animal)}
+          >
             <TableCell>
               <AnimalAvatar src={animal.image ? imagePaths[animal.image] : undefined} alt={animal.name} size="sm" />
             </TableCell>
@@ -46,19 +47,6 @@ export function AnimalsTable({ animals, imagePaths, onView, onEdit }: Props): Re
             <TableCell>{animal.type?.name}</TableCell>
             <TableCell>{animal.dateOfBirth ? new Date(animal.dateOfBirth).toLocaleDateString() : '-'}</TableCell>
             <TableCell>{animal.weight ? `${animal.weight}kg` : '-'}</TableCell>
-            <TableCell>
-              <Button
-                variant="secondary"
-                size="sm"
-                className="mr-2"
-                onClick={() => onView(animal)}
-              >
-                View
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => onEdit(animal)}>
-                Edit
-              </Button>
-            </TableCell>
           </TableRow>
         ))}
       </TableBody>

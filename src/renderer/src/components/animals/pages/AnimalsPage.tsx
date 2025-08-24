@@ -5,15 +5,6 @@ import { Button } from '../../ui/button'
 import { Input } from '../../ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select'
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger
-} from '../../ui/dialog'
-import {
   Drawer,
   DrawerContent,
   DrawerDescription,
@@ -522,35 +513,6 @@ export const AnimalsPage = forwardRef<AnimalsHandles, unknown>((_, ref): React.R
             <Button type="submit" form="animal-form" className="flex-1">
               {selectedAnimal ? 'Update' : 'Create'} Animal
             </Button>
-            {selectedAnimal && (
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button variant="destructive" type="button" className="flex-1">
-                    Delete
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Are you sure you want to delete this animal?</DialogTitle>
-                    <DialogDescription>
-                      This action cannot be undone. This will permanently delete {formData.name}.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <DialogFooter>
-                    <Button variant="outline" type="button">
-                      Cancel
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      type="button"
-                      onClick={() => handleDelete(selectedAnimal.id)}
-                    >
-                      Delete
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
-            )}
             <DrawerClose asChild>
               <Button type="button" variant="outline" className="flex-1">
                 Cancel
@@ -586,7 +548,6 @@ export const AnimalsPage = forwardRef<AnimalsHandles, unknown>((_, ref): React.R
             setSelectedAnimal(animal)
             setIsDialogOpen(true)
           }}
-          onEdit={(animal) => handleEdit(animal)}
         />
       </div>
     </div>
