@@ -17,6 +17,17 @@ export interface AnimalType {
 
 export type Gender = 'MALE' | 'FEMALE' | 'CASTRATED' | 'UNKNOWN'
 
+export interface AnimalDocument {
+  id: number
+  animal_id: number
+  filename: string
+  original_name: string
+  file_path?: string
+  file_size?: number
+  mime_type?: string
+  created_at: string
+}
+
 export interface Animal {
   id: number
   tagNumber?: string
@@ -34,6 +45,7 @@ export interface Animal {
   type_id: number
   description: string
   image?: string
+  documents?: string[]
   created_at: string
   updated_at: string
   type?: AnimalType

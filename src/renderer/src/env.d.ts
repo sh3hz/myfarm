@@ -25,7 +25,7 @@ interface Window {
     getAnimals: () => Promise<any[]>
     getAnimal: (id: number) => Promise<any>
     createAnimal: (data: any) => Promise<any>
-    updateAnimal: (id: number, data: any) => Promise<any>
+    updateAnimal: (id: number, data: any) => Promise<any | undefined>
     deleteAnimal: (id: number) => Promise<void>
     saveImage: (imageData: string) => Promise<string>
     getImagePath: (relativePath: string) => Promise<string>
@@ -33,5 +33,11 @@ interface Window {
     getAnimalStats: () => Promise<any>
     exportAnimalsToExcel: () => Promise<{ success: boolean; filePath?: string; message?: string }>
     getAnimalTypeCounts: () => Promise<Array<{ name: string; count: number }>>
+    getAnimalDocuments: (animalId: number) => Promise<string[]>
+    addAnimalDocument: (animalId: number, filename: string, originalName: string) => Promise<void>
+    removeAnimalDocument: (animalId: number, filename: string) => Promise<void>
+    saveDocument: (fileData: string, originalName: string) => Promise<string>
+    getDocumentPath: (filename: string) => Promise<string>
+    openDocument: (filename: string) => Promise<void>
   }
 }

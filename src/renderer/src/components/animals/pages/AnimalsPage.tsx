@@ -15,13 +15,14 @@ import {
 } from '../../ui/drawer'
 import { Label } from '../../ui/label'
 import { toast } from 'sonner'
-import { PawPrint, Plus } from 'lucide-react'
+import { PawPrint, Plus, FileText } from 'lucide-react'
 import { AnimalsToolbar, AnimalViewDialog, AnimalsTable } from '..'
 import { AnimalTypesModal } from '../AnimalTypesModal'
 
 interface AnimalFormData extends Omit<Animal, 'id' | 'created_at' | 'updated_at' | 'type'> {
   type_id: number
   image?: string
+  documents?: string[]
   tagNumber?: string
   gender: Gender
   dateOfBirth?: string
@@ -39,6 +40,7 @@ const defaultAnimal: AnimalFormData = {
   type_id: 0,
   description: '',
   image: '',
+  documents: [],
   gender: 'UNKNOWN',
   tagNumber: '',
   dateOfBirth: '',
@@ -130,7 +132,8 @@ export const AnimalsPage = forwardRef<AnimalsHandles, unknown>((_, ref): React.R
     setFormData({
       ...animal,
       type_id: animal.type?.id || 0, // Add null check for type
-      image: animal.image || ''
+      image: animal.image || '',
+      documents: animal.documents || []
     } as AnimalFormData)
 
     // Load image path if animal has an image and it's not in cache
@@ -174,8 +177,15 @@ export const AnimalsPage = forwardRef<AnimalsHandles, unknown>((_, ref): React.R
         }
 
         if (selectedAnimal) {
-          await window.api.updateAnimal(selectedAnimal.id, animalData)
-          toast.success('Animal updated successfully')
+          const updatedAnimal = await window.api.updateAnimal(selectedAnimal.id, animalData)
+          if (updatedAnimal) {
+            toast.success('Animal updated successfully')
+            // Update the selected animal state to refresh the profile view
+            setSelectedAnimal(updatedAnimal)
+          } else {
+            toast.error('Failed to update animal')
+            return // Don't close drawer if update failed
+          }
         } else {
           await window.api.createAnimal(animalData)
           toast.success('Animal created successfully')
@@ -505,6 +515,94 @@ export const AnimalsPage = forwardRef<AnimalsHandles, unknown>((_, ref): React.R
                       }
                     }}
                   />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="documents">Documents</Label>
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <div className="relative w-16 h-16 rounded-lg bg-muted flex items-center justify-center">
+                      <FileText className="w-7 h-7 text-muted-foreground" />
+                    </div>
+                    <Input
+                      id="documents"
+                      name="documents"
+                      type="file"
+                      multiple
+                      accept="*/*"
+                      className="flex-1"
+                      onChange={async (e) => {
+                        const files = Array.from(e.target.files || [])
+                        if (files.length > 0) {
+                          try {
+                            const uploadPromises = files.map(file => {
+                              return new Promise<string>((resolve, reject) => {
+                                const reader = new FileReader()
+                                reader.onload = async (e) => {
+                                  try {
+                                    const fileData = e.target?.result as string
+                                    const savedFilename = await window.api.saveDocument(fileData, file.name)
+                                    resolve(savedFilename)
+                                  } catch (error) {
+                                    reject(error)
+                                  }
+                                }
+                                reader.onerror = reject
+                                reader.readAsDataURL(file)
+                              })
+                            })
+
+                            const savedFilenames = await Promise.all(uploadPromises)
+                            
+                            setFormData((prev) => ({
+                              ...prev,
+                              documents: [...(prev.documents || []), ...savedFilenames]
+                            }))
+                            
+                            toast.success(`${files.length} document(s) added`)
+                          } catch (error) {
+                            toast.error('Error uploading documents')
+                            console.error('Error uploading documents:', error)
+                          }
+                        }
+                      }}
+                    />
+                  </div>
+                  {formData.documents && formData.documents.length > 0 && (
+                    <div className="flex flex-wrap gap-1 max-w-full">
+                      {formData.documents.map((doc, index) => {
+                        const displayName = doc.replace(/_\d+(\.[^.]+)?$/, '$1')
+                        const truncatedName = displayName.length > 25 
+                          ? `${displayName.substring(0, 22)}...` 
+                          : displayName
+                        
+                        return (
+                          <span
+                            key={index}
+                            className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-secondary text-secondary-foreground rounded-md max-w-full"
+                            title={displayName}
+                          >
+                            <FileText className="w-3 h-3 flex-shrink-0" />
+                            <span className="truncate">{truncatedName}</span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  documents: prev.documents?.filter((_, i) => i !== index) || []
+                                }))
+                              }}
+                              className="ml-1 text-muted-foreground hover:text-foreground flex-shrink-0"
+                              title="Remove document"
+                            >
+                              ×
+                            </button>
+                          </span>
+                        )
+                      })}
+                    </div>
+                  )}
                 </div>
               </div>
             </form>

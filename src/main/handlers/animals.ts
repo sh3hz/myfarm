@@ -16,8 +16,8 @@ export function registerAnimalHandlers(): void {
 
   ipcMain.handle(
     'create-animal',
-    async (_: unknown, data: Omit<Animal, 'id' | 'created_at' | 'updated_at'>): Promise<void> => {
-      await animalsRepo.create(data)
+    async (_: unknown, data: Omit<Animal, 'id' | 'created_at' | 'updated_at'>): Promise<number> => {
+      return animalsRepo.create(data)
     }
   )
 
@@ -77,7 +77,8 @@ export function registerAnimalHandlers(): void {
         AcquisitionDate: a.acquisitionDate ?? '',
         AcquisitionLocation: a.acquisitionLocation ?? '',
         ExitDate: a.exitDate ?? '',
-        ExitReason: a.exitReason ?? ''
+        ExitReason: a.exitReason ?? '',
+        Documents: a.documents?.join(', ') ?? ''
       }))
 
       const ws = XLSX.utils.json_to_sheet(rows)

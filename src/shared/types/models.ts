@@ -32,6 +32,7 @@ export interface Animal {
   type_id: number
   description: string
   image?: string
+  documents?: string[]
   created_at: string
   updated_at: string
   type?: AnimalType

@@ -1,6 +1,7 @@
 import type { Animal } from '../../db/models'
 import { getDb } from '../connection'
 import { mapAnimalRow } from '../mappers'
+import * as documentsRepo from './documentsRepo'
 
 export async function getAll(): Promise<Animal[]> {
   const db = getDb()
@@ -16,7 +17,16 @@ export async function getAll(): Promise<Animal[]> {
     `
     )
     .all()
-  return rows.map(mapAnimalRow)
+  
+  // Load documents for each animal
+  const animals = await Promise.all(
+    rows.map(async (row: any) => {
+      const documents = await documentsRepo.getDocumentsByAnimalId(row.id)
+      return mapAnimalRow(row, documents)
+    })
+  )
+  
+  return animals
 }
 
 export async function getById(id: number): Promise<Animal | undefined> {
@@ -35,10 +45,12 @@ export async function getById(id: number): Promise<Animal | undefined> {
     )
     .get(id)
   if (!row) return undefined
-  return mapAnimalRow(row)
+  
+  const documents = await documentsRepo.getDocumentsByAnimalId(id)
+  return mapAnimalRow(row, documents)
 }
 
-export async function create(data: Omit<Animal, 'id' | 'created_at' | 'updated_at'>): Promise<void> {
+export async function create(data: Omit<Animal, 'id' | 'created_at' | 'updated_at'>): Promise<number> {
   const db = getDb()
   const now = new Date().toISOString()
   const stmt = db.prepare(
@@ -53,7 +65,7 @@ export async function create(data: Omit<Animal, 'id' | 'created_at' | 'updated_a
   `
   )
 
-  stmt.run(
+  const result = stmt.run(
     data.name,
     data.breed,
     data.age ?? null,
@@ -72,6 +84,17 @@ export async function create(data: Omit<Animal, 'id' | 'created_at' | 'updated_a
     data.exitDate,
     data.exitReason
   )
+
+  const animalId = result.lastInsertRowid as number
+
+  // Add documents if provided
+  if (data.documents && data.documents.length > 0) {
+    for (const filename of data.documents) {
+      await documentsRepo.addDocument(animalId, filename, filename)
+    }
+  }
+
+  return animalId
 }
 
 export async function update(
@@ -115,11 +138,25 @@ export async function update(
       id
     ) as { id: number } | undefined
 
+  // Handle documents update if provided
+  if (data.documents !== undefined) {
+    // Remove all existing documents
+    await documentsRepo.removeAllDocuments(id)
+    
+    // Add new documents
+    if (data.documents.length > 0) {
+      for (const filename of data.documents) {
+        await documentsRepo.addDocument(id, filename, filename)
+      }
+    }
+  }
+
   return res ? getById(res.id) : undefined
 }
 
 export async function remove(id: number): Promise<void> {
   const db = getDb()
+  // Documents will be automatically deleted due to CASCADE constraint
   db.prepare('DELETE FROM animals WHERE id = ?').run(id)
 }
 

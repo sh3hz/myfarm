@@ -1,7 +1,7 @@
 import type { Animal, AnimalType } from './models'
 
 // Helper to map DB row (snake_case) to Animal (camelCase)
-export function mapAnimalRow(row: any): Animal {
+export function mapAnimalRow(row: any, documents?: string[]): Animal {
   return {
     id: row.id,
     name: row.name,
@@ -10,6 +10,7 @@ export function mapAnimalRow(row: any): Animal {
     type_id: row.type_id,
     description: row.description,
     image: row.image,
+    documents: documents || [],
     gender: row.gender,
     tagNumber: row.tag_number,
     dateOfBirth: row.date_of_birth,

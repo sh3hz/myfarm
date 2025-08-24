@@ -24,6 +24,17 @@ const api = {
   saveImage: (imageData: string) => ipcRenderer.invoke('save-image', imageData),
   getImagePath: (relativePath: string) => ipcRenderer.invoke('get-image-path', relativePath),
   getImagePaths: (relativePaths: string[]) => ipcRenderer.invoke('get-image-paths', relativePaths),
+
+  // Document handling API
+  getAnimalDocuments: (animalId: number) => ipcRenderer.invoke('get-animal-documents', animalId),
+  addAnimalDocument: (animalId: number, filename: string, originalName: string) => 
+    ipcRenderer.invoke('add-animal-document', animalId, filename, originalName),
+  removeAnimalDocument: (animalId: number, filename: string) => 
+    ipcRenderer.invoke('remove-animal-document', animalId, filename),
+  saveDocument: (fileData: string, originalName: string) => 
+    ipcRenderer.invoke('save-document', fileData, originalName),
+  getDocumentPath: (filename: string) => ipcRenderer.invoke('get-document-path', filename),
+  openDocument: (filename: string) => ipcRenderer.invoke('open-document', filename),
   
   // Statistics API
   getAnimalStats: () => ipcRenderer.invoke('get-animal-stats'),

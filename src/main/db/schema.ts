@@ -41,6 +41,24 @@ export function initDatabase(db: Database.Database): void {
   // Basic index for common lookup
   db.exec(`CREATE INDEX IF NOT EXISTS idx_animals_type_id ON animals(type_id)`)
 
+  // Create animal_documents table if it doesn't exist
+  db.exec(`
+      CREATE TABLE IF NOT EXISTS animal_documents (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        animal_id INTEGER NOT NULL,
+        filename TEXT NOT NULL,
+        original_name TEXT NOT NULL,
+        file_path TEXT,
+        file_size INTEGER,
+        mime_type TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (animal_id) REFERENCES animals(id) ON DELETE CASCADE
+      )
+    `)
+
+  // Index for document lookups
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_animal_documents_animal_id ON animal_documents(animal_id)`)
+
   // Create app_info table if it doesn't exist
   db.exec(`
       CREATE TABLE IF NOT EXISTS app_info (
