@@ -40,5 +40,6 @@ appImage:
   artifactName: ${name}-${version}.${ext}
 npmRebuild: false
 publish:
-  provider: generic
-  url: https://myfarm.shehaz.me/releases
+  provider: github
+  owner: sh3hz
+  repo: myfarm

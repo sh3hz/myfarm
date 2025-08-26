@@ -1,6 +1,7 @@
-import { app, shell, BrowserWindow, ipcMain, protocol } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, protocol, dialog } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
+import { autoUpdater } from 'electron-updater'
 import icon from '../../resources/icon.png?asset'
 import { databaseService } from './database'
 import { registerAnimalTypeHandlers } from './handlers/animalTypes'
@@ -57,12 +58,109 @@ function createWindow(): void {
   }
 }
 
+// Configure auto-updater
+function setupAutoUpdater(): void {
+  // Configure auto-updater settings
+  autoUpdater.autoDownload = false // Don't auto-download updates
+  autoUpdater.autoInstallOnAppQuit = false // Don't auto-install on quit
+  
+  console.log('Current app version:', app.getVersion())
+  console.log('Auto-updater feed URL:', autoUpdater.getFeedURL())
+  
+  // Check for updates after a delay to avoid immediate restart loops
+  setTimeout(() => {
+    console.log('Checking for updates...')
+    autoUpdater.checkForUpdatesAndNotify()
+  }, 5000) // Wait 5 seconds after app start
+
+  // Handle update events
+  autoUpdater.on('checking-for-update', () => {
+    console.log('Checking for update...')
+  })
+
+  autoUpdater.on('update-available', (info) => {
+    console.log('Update available:', info)
+    console.log('Current version:', app.getVersion())
+    console.log('Available version:', info.version)
+    
+    // Check if the available version is actually newer
+    const currentVersion = app.getVersion()
+    if (info.version === currentVersion) {
+      console.log('Available version is same as current version, skipping update dialog')
+      return
+    }
+    
+    // Show native dialog asking user if they want to download the update
+    const windows = BrowserWindow.getAllWindows()
+    if (windows.length > 0) {
+      dialog.showMessageBox(windows[0], {
+        type: 'info',
+        title: 'Update Available',
+        message: `A new version (${info.version}) is available. Current version: ${currentVersion}. Would you like to download it now?`,
+        buttons: ['Download Now', 'Later'],
+        defaultId: 0,
+        cancelId: 1
+      }).then((result) => {
+        if (result.response === 0) {
+          // User clicked "Download Now"
+          autoUpdater.downloadUpdate()
+        }
+      })
+    }
+  })
+
+  autoUpdater.on('update-not-available', (info) => {
+    console.log('Update not available:', info)
+    console.log('Current version is up to date:', app.getVersion())
+  })
+
+  autoUpdater.on('error', (err) => {
+    console.log('Error in auto-updater:', err)
+  })
+
+  autoUpdater.on('download-progress', (progressObj) => {
+    let log_message = "Download speed: " + progressObj.bytesPerSecond
+    log_message = log_message + ' - Downloaded ' + progressObj.percent + '%'
+    log_message = log_message + ' (' + progressObj.transferred + "/" + progressObj.total + ')'
+    console.log(log_message)
+  })
+
+  autoUpdater.on('update-downloaded', (info) => {
+    console.log('Update downloaded:', info)
+    
+    // Show native dialog asking user if they want to install now
+    const windows = BrowserWindow.getAllWindows()
+    if (windows.length > 0) {
+      dialog.showMessageBox(windows[0], {
+        type: 'info',
+        title: 'Update Ready',
+        message: `Update has been downloaded. The application will restart to apply the update.`,
+        buttons: ['Restart Now', 'Later'],
+        defaultId: 0,
+        cancelId: 1
+      }).then((result) => {
+        if (result.response === 0) {
+          // User clicked "Restart Now"
+          setTimeout(() => {
+            autoUpdater.quitAndInstall(false, true)
+          }, 1000)
+        }
+      })
+    }
+  })
+}
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
   // Set app user model id for windows
-  electronApp.setAppUserModelId('com.electron')
+  electronApp.setAppUserModelId('com.myfarm')
+
+  // Setup auto-updater (only in production)
+  if (!is.dev) {
+    setupAutoUpdater()
+  }
 
   // Default open or close DevTools by F12 in development
   // and ignore CommandOrControl + R in production.
@@ -85,6 +183,37 @@ app.whenReady().then(() => {
     } catch (error) {
       console.error('Main process - Error getting app info:', error)
       throw error
+    }
+  })
+
+  // Auto-updater IPC handlers
+  ipcMain.handle('check-for-updates', async () => {
+    if (!is.dev) {
+      return await autoUpdater.checkForUpdates()
+    }
+    return null
+  })
+
+  ipcMain.handle('download-update', async () => {
+    if (!is.dev) {
+      return await autoUpdater.downloadUpdate()
+    }
+    return null
+  })
+
+  ipcMain.handle('install-update', () => {
+    if (!is.dev) {
+      // Give a small delay before installing
+      setTimeout(() => {
+        autoUpdater.quitAndInstall(false, true)
+      }, 1000)
+    }
+  })
+
+  ipcMain.handle('get-update-info', () => {
+    return {
+      version: app.getVersion(),
+      isUpdateAvailable: false // This would be set by update events
     }
   })
 
