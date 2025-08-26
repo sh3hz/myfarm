@@ -30,6 +30,8 @@ jspm_packages/
 # dotenv environment variables
 .env
 .env.*
+.env.local
+.env.production
 
 # VS Code settings
 .vscode/
@@ -39,6 +41,8 @@ Thumbs.db
 
 # Electron
 release/
+app/
+*.asar
 
 # TypeScript
 *.tsbuildinfo
@@ -53,3 +57,16 @@ yarn.lock
 *.njsproj
 *.sln
 *.sw?
+
+# Database files (if using local SQLite for development)
+*.db
+*.sqlite
+*.sqlite3
+
+# Coverage reports
+coverage/
+.nyc_output/
+
+# Temporary files
+*.tmp
+*.temp
