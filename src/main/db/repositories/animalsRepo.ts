@@ -156,8 +156,49 @@ export async function update(
 
 export async function remove(id: number): Promise<void> {
   const db = getDb()
+  
+  // Get animal data before deletion to clean up files
+  const animal = await getById(id)
+  if (!animal) return
+  
+  // Clean up associated files
+  await cleanupAnimalFiles(animal)
+  
   // Documents will be automatically deleted due to CASCADE constraint
   db.prepare('DELETE FROM animals WHERE id = ?').run(id)
+}
+
+async function cleanupAnimalFiles(animal: Animal): Promise<void> {
+  const fs = await import('fs')
+  const path = await import('path')
+  const { app } = await import('electron')
+  
+  try {
+    // Clean up image file
+    if (animal.image) {
+      const imagePath = path.join(app.getPath('userData'), animal.image)
+      if (fs.existsSync(imagePath)) {
+        fs.unlinkSync(imagePath)
+        console.log(`Deleted image file: ${imagePath}`)
+      }
+    }
+    
+    // Clean up document files
+    if (animal.documents && animal.documents.length > 0) {
+      const documentsDir = path.join(app.getPath('userData'), 'documents')
+      
+      for (const filename of animal.documents) {
+        const documentPath = path.join(documentsDir, filename)
+        if (fs.existsSync(documentPath)) {
+          fs.unlinkSync(documentPath)
+          console.log(`Deleted document file: ${documentPath}`)
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Error cleaning up animal files:', error)
+    // Don't throw error to prevent deletion from failing
+  }
 }
 
 export async function getStats(): Promise<{

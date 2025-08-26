@@ -33,8 +33,14 @@ export function registerAnimalHandlers(): void {
   )
 
   ipcMain.handle('delete-animal', async (_: unknown, id: number): Promise<number> => {
-    await animalsRepo.remove(id)
-    return id
+    try {
+      await animalsRepo.remove(id)
+      console.log(`Successfully deleted animal with ID: ${id} and associated files`)
+      return id
+    } catch (error) {
+      console.error(`Error deleting animal with ID: ${id}`, error)
+      throw error
+    }
   })
 
   ipcMain.handle(

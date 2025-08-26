@@ -211,7 +211,16 @@ export const AnimalsPage = forwardRef<AnimalsHandles, unknown>((_, ref): React.R
   const handleDelete = useCallback(
     async (id: number): Promise<void> => {
       try {
+        // Get the animal data before deletion to know which files to clean up
+        const animalToDelete = animals.find(animal => animal.id === id)
+
         await window.api.deleteAnimal(id)
+
+        // Clean up image cache if animal had an image
+        if (animalToDelete?.image) {
+          globalImageCache.delete(animalToDelete.image)
+        }
+
         await loadAnimals()
         toast.success('Animal deleted successfully')
         if (selectedAnimal?.id === id) {
@@ -224,7 +233,7 @@ export const AnimalsPage = forwardRef<AnimalsHandles, unknown>((_, ref): React.R
         toast.error('Failed to delete animal')
       }
     },
-    [loadAnimals, selectedAnimal]
+    [loadAnimals, selectedAnimal, animals]
   )
 
   return (
