@@ -87,6 +87,25 @@ export function initDatabase(db: Database.Database): void {
   db.exec(`CREATE INDEX IF NOT EXISTS idx_transactions_date ON transactions(date)`)
   db.exec(`CREATE INDEX IF NOT EXISTS idx_transactions_type_date ON transactions(type, date)`)
 
+  // Create animal_health_records table for insemination and deworming records
+  db.exec(`
+      CREATE TABLE IF NOT EXISTS animal_health_records (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        animal_id INTEGER NOT NULL,
+        record_type TEXT NOT NULL CHECK(record_type IN ('insemination', 'deworming')),
+        date TEXT NOT NULL,
+        expected_delivery_date TEXT,
+        notes TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (animal_id) REFERENCES animals(id) ON DELETE CASCADE
+      )
+    `)
+
+  // Index for health record lookups
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_animal_health_records_animal_id ON animal_health_records(animal_id)`)
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_animal_health_records_type ON animal_health_records(record_type)`)
+
   // Insert default app info atomically if table is empty
   db.prepare(
     `

@@ -37,3 +37,16 @@ export interface Animal {
   updated_at: string
   type?: AnimalType
 }
+
+export type HealthRecordType = 'insemination' | 'deworming'
+
+export interface AnimalHealthRecord {
+  id: number
+  animal_id: number
+  record_type: HealthRecordType
+  date: string
+  expected_delivery_date?: string
+  notes?: string
+  created_at: string
+  updated_at: string
+}

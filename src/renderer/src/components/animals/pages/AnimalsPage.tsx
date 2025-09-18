@@ -16,7 +16,7 @@ import {
 import { Label } from '../../ui/label'
 import { toast } from 'sonner'
 import { PawPrint, Plus, FileText } from 'lucide-react'
-import { AnimalsToolbar, AnimalViewDialog, AnimalsTable } from '..'
+import { AnimalsToolbar, AnimalViewDialog, AnimalsTable, AnimalHealthModal } from '..'
 import { AnimalTypesModal } from '../AnimalTypesModal'
 
 interface AnimalFormData extends Omit<Animal, 'id' | 'created_at' | 'updated_at' | 'type'> {
@@ -71,6 +71,8 @@ export const AnimalsPage = forwardRef<AnimalsHandles, unknown>((_, ref): React.R
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [isTypesModalOpen, setIsTypesModalOpen] = useState(false)
+  const [isHealthModalOpen, setIsHealthModalOpen] = useState(false)
+  const [healthModalAnimal, setHealthModalAnimal] = useState<Animal | null>(null)
   const [formData, setFormData] = useState<AnimalFormData>({ ...defaultAnimal })
   const [, forceUpdate] = useState({})
 
@@ -273,204 +275,215 @@ export const AnimalsPage = forwardRef<AnimalsHandles, unknown>((_, ref): React.R
             <DrawerDescription>Fill in the details for the animal</DrawerDescription>
           </DrawerHeader>
           <div className="flex-1 overflow-y-auto px-4">
-            <form onSubmit={handleSubmit} className="space-y-4 mt-4" id="animal-form">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Name</Label>
-                  <Input
-                    id="name"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="breed">Breed</Label>
-                  <Input
-                    id="breed"
-                    name="breed"
-                    value={formData.breed}
-                    onChange={handleInputChange}
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="age">Age</Label>
-                  <Input
-                    id="age"
-                    name="age"
-                    type="number"
-                    value={formData.age ?? ''}
-                    onChange={handleInputChange}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="type_id">Animal Type *</Label>
-                  <div className="flex space-x-2">
-                    {/* Hidden input for HTML5 validation */}
-                    <input
-                      type="hidden"
-                      name="type_id"
-                      value={formData.type_id || ''}
+            <form onSubmit={handleSubmit} className="space-y-4 mt-2" id="animal-form">
+              {/* Basic Information Section */}
+              <div className="space-y-3">
+                <h3 className="font-medium text-sm">Basic Information</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="space-y-1">
+                    <Label htmlFor="name" className="text-xs font-medium">Name *</Label>
+                    <Input
+                      id="name"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleInputChange}
                       required
-                      onChange={() => { }} // Controlled by Select component
+                      className="h-9 text-sm"
                     />
-                    <Select
-                      value={formData.type_id ? formData.type_id.toString() : ''}
-                      onValueChange={(value) => {
-                        setFormData((prev) => ({
-                          ...prev,
-                          type_id: value ? parseInt(value) : 0
-                        }))
-                      }}
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select a type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {animalTypes.map((type) => (
-                          <SelectItem key={type.id} value={type.id.toString()}>
-                            {type.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setIsTypesModalOpen(true)}
-                    >
-                      <Plus className="h-4 w-4" />
-                    </Button>
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="breed" className="text-xs font-medium">Breed</Label>
+                    <Input
+                      id="breed"
+                      name="breed"
+                      value={formData.breed}
+                      onChange={handleInputChange}
+                      className="h-9 text-sm"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="age" className="text-xs font-medium">Age</Label>
+                    <Input
+                      id="age"
+                      name="age"
+                      type="number"
+                      value={formData.age ?? ''}
+                      onChange={handleInputChange}
+                      className="h-9 text-sm"
+                    />
                   </div>
                 </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
-                <Input
-                  id="description"
-                  name="description"
-                  value={formData.description}
-                  onChange={handleInputChange}
-                />
+
+              {/* Type and Identification Section */}
+              <div className="space-y-3">
+                <h3 className="font-medium text-sm">Type & Identification</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="space-y-1">
+                    <Label htmlFor="type_id" className="text-xs font-medium">Animal Type *</Label>
+                    <div className="flex space-x-2">
+                      <input
+                        type="hidden"
+                        name="type_id"
+                        value={formData.type_id || ''}
+                        required
+                        onChange={() => { }}
+                      />
+                      <Select
+                        value={formData.type_id ? formData.type_id.toString() : ''}
+                        onValueChange={(value) => {
+                          setFormData((prev) => ({
+                            ...prev,
+                            type_id: value ? parseInt(value) : 0
+                          }))
+                        }}
+                      >
+                        <SelectTrigger className="h-9 text-sm">
+                          <SelectValue placeholder="Select type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {animalTypes.map((type) => (
+                            <SelectItem key={type.id} value={type.id.toString()}>
+                              {type.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setIsTypesModalOpen(true)}
+                        className="h-9 w-9 p-0"
+                        title="Add new type"
+                      >
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="tagNumber" className="text-xs font-medium">Tag Number</Label>
+                    <Input
+                      id="tagNumber"
+                      name="tagNumber"
+                      value={formData.tagNumber}
+                      onChange={handleInputChange}
+                      className="h-9 text-sm"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="gender" className="text-xs font-medium">Gender</Label>
+                    <Select
+                      value={formData.gender}
+                      onValueChange={(value) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          gender: value as Gender
+                        }))
+                      }
+                    >
+                      <SelectTrigger className="h-9 text-sm">
+                        <SelectValue placeholder="Select gender" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="MALE">Male</SelectItem>
+                        <SelectItem value="FEMALE">Female</SelectItem>
+                        <SelectItem value="CASTRATED">Castrated</SelectItem>
+                        <SelectItem value="UNKNOWN">Unknown</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="tagNumber">Tag Number</Label>
-                  <Input
-                    id="tagNumber"
-                    name="tagNumber"
-                    value={formData.tagNumber}
-                    onChange={handleInputChange}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="gender">Gender</Label>
-                  <Select
-                    value={formData.gender}
-                    onValueChange={(value) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        gender: value as Gender
-                      }))
-                    }
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select gender" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="MALE">Male</SelectItem>
-                      <SelectItem value="FEMALE">Female</SelectItem>
-                      <SelectItem value="CASTRATED">Castrated</SelectItem>
-                      <SelectItem value="UNKNOWN">Unknown</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="dateOfBirth">Date of Birth</Label>
-                  <Input
-                    id="dateOfBirth"
-                    name="dateOfBirth"
-                    type="date"
-                    value={formData.dateOfBirth}
-                    onChange={handleInputChange}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="weight">Weight (kg)</Label>
-                  <Input
-                    id="weight"
-                    name="weight"
-                    type="number"
-                    step="0.1"
-                    value={formData.weight || ''}
-                    onChange={handleInputChange}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="height">Height (cm)</Label>
-                  <Input
-                    id="height"
-                    name="height"
-                    type="number"
-                    step="0.1"
-                    value={formData.height || ''}
-                    onChange={handleInputChange}
-                  />
+              {/* Physical Attributes Section */}
+              <div className="space-y-3">
+                <h3 className="font-medium text-sm">Physical Attributes</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="space-y-1">
+                    <Label htmlFor="dateOfBirth" className="text-xs font-medium">Date of Birth</Label>
+                    <Input
+                      id="dateOfBirth"
+                      name="dateOfBirth"
+                      type="date"
+                      value={formData.dateOfBirth}
+                      onChange={handleInputChange}
+                      className="h-9 text-sm"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="weight" className="text-xs font-medium">Weight (kg)</Label>
+                    <Input
+                      id="weight"
+                      name="weight"
+                      type="number"
+                      step="0.1"
+                      value={formData.weight || ''}
+                      onChange={handleInputChange}
+                      className="h-9 text-sm"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="height" className="text-xs font-medium">Height (cm)</Label>
+                    <Input
+                      id="height"
+                      name="height"
+                      type="number"
+                      step="0.1"
+                      value={formData.height || ''}
+                      onChange={handleInputChange}
+                      className="h-9 text-sm"
+                    />
+                  </div>
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label>Acquisition</Label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="acquisitionDate">Date</Label>
+              {/* Acquisition Section */}
+              <div className="space-y-3">
+                <h3 className="font-medium text-sm">Acquisition</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <Label htmlFor="acquisitionDate" className="text-xs font-medium">Date</Label>
                     <Input
                       id="acquisitionDate"
                       name="acquisitionDate"
                       type="date"
                       value={formData.acquisitionDate}
                       onChange={handleInputChange}
+                      className="h-9 text-sm"
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="acquisitionLocation">Location</Label>
+                  <div className="space-y-1">
+                    <Label htmlFor="acquisitionLocation" className="text-xs font-medium">Location</Label>
                     <Input
                       id="acquisitionLocation"
                       name="acquisitionLocation"
                       value={formData.acquisitionLocation}
                       onChange={handleInputChange}
                       placeholder="Where was the animal acquired?"
+                      className="h-9 text-sm"
                     />
                   </div>
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label>Exit Information</Label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="exitDate">Exit Date</Label>
+              {/* Exit Information Section */}
+              <div className="space-y-3">
+                <h3 className="font-medium text-sm">Exit Information</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <Label htmlFor="exitDate" className="text-xs font-medium">Exit Date</Label>
                     <Input
                       id="exitDate"
                       name="exitDate"
                       type="date"
                       value={formData.exitDate}
                       onChange={handleInputChange}
+                      className="h-9 text-sm"
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="exitReason">Reason</Label>
+                  <div className="space-y-1">
+                    <Label htmlFor="exitReason" className="text-xs font-medium">Reason</Label>
                     <Select
                       value={formData.exitReason}
                       onValueChange={(value) =>
@@ -480,7 +493,7 @@ export const AnimalsPage = forwardRef<AnimalsHandles, unknown>((_, ref): React.R
                         }))
                       }
                     >
-                      <SelectTrigger className="w-full">
+                      <SelectTrigger className="h-9 text-sm">
                         <SelectValue placeholder="Select a reason" />
                       </SelectTrigger>
                       <SelectContent>
@@ -662,6 +675,16 @@ export const AnimalsPage = forwardRef<AnimalsHandles, unknown>((_, ref): React.R
         onTypeSelect={handleTypeSelect}
         onTypeAdded={loadAnimalTypes}
       />
+      {/* Animal Health Modal */}
+      <AnimalHealthModal
+        animal={healthModalAnimal}
+        open={isHealthModalOpen}
+        onClose={() => {
+          setIsHealthModalOpen(false)
+          setHealthModalAnimal(null)
+        }}
+      />
+
       <div className="mt-6">
         <AnimalsTable
           animals={animals}
@@ -669,6 +692,10 @@ export const AnimalsPage = forwardRef<AnimalsHandles, unknown>((_, ref): React.R
           onView={(animal) => {
             setSelectedAnimal(animal)
             setIsDialogOpen(true)
+          }}
+          onHealthRecord={(animal) => {
+            setHealthModalAnimal(animal)
+            setIsHealthModalOpen(true)
           }}
         />
       </div>

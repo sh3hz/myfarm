@@ -75,5 +75,12 @@ interface Window {
     getTransactionsByType: (type: 'income' | 'expense') => Promise<Transaction[]>
     getMonthlyStats: (year: number) => Promise<MonthlyStats[]>
     exportTransactionsToExcel: () => Promise<{ success: boolean; filePath?: string; message?: string }>
+    
+    // Health Records API
+    getHealthRecords: (animalId: number) => Promise<any[]>
+    getHealthRecordsByType: (animalId: number, recordType: string) => Promise<any[]>
+    createHealthRecord: (data: any) => Promise<number>
+    updateHealthRecord: (id: number, data: any) => Promise<any | undefined>
+    deleteHealthRecord: (id: number) => Promise<void>
   }
 }

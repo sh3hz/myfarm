@@ -70,4 +70,17 @@ export interface CashflowSummary {
   transactionCount: number
 }
 
+export type HealthRecordType = 'insemination' | 'deworming'
+
+export interface AnimalHealthRecord {
+  id: number
+  animal_id: number
+  record_type: HealthRecordType
+  date: string
+  expected_delivery_date?: string
+  notes?: string
+  created_at: string
+  updated_at: string
+}
+
 export type SqliteDatabase = Database.Database

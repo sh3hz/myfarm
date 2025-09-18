@@ -51,7 +51,15 @@ const api = {
     ipcRenderer.invoke('get-transactions-by-date-range', startDate, endDate),
   getTransactionsByType: (type: string) => ipcRenderer.invoke('get-transactions-by-type', type),
   getMonthlyStats: (year: number) => ipcRenderer.invoke('get-monthly-stats', year),
-  exportTransactionsToExcel: () => ipcRenderer.invoke('export-transactions-excel')
+  exportTransactionsToExcel: () => ipcRenderer.invoke('export-transactions-excel'),
+
+  // Health Records API
+  getHealthRecords: (animalId: number) => ipcRenderer.invoke('get-health-records', animalId),
+  getHealthRecordsByType: (animalId: number, recordType: string) => 
+    ipcRenderer.invoke('get-health-records-by-type', animalId, recordType),
+  createHealthRecord: (data: any) => ipcRenderer.invoke('create-health-record', data),
+  updateHealthRecord: (id: number, data: any) => ipcRenderer.invoke('update-health-record', id, data),
+  deleteHealthRecord: (id: number) => ipcRenderer.invoke('delete-health-record', id)
 }
 
 // Expose protected methods that allow the renderer process to use
