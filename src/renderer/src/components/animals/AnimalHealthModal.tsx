@@ -27,7 +27,6 @@ interface HealthRecordForm {
 
 export function AnimalHealthModal({ animal, open, onClose }: Props) {
   const [healthRecords, setHealthRecords] = useState<AnimalHealthRecord[]>([])
-  const [loading, setLoading] = useState(false)
   const [inseminationForm, setInseminationForm] = useState<HealthRecordForm>({
     record_type: 'insemination',
     date: undefined,
@@ -49,15 +48,12 @@ export function AnimalHealthModal({ animal, open, onClose }: Props) {
   const loadHealthRecords = async () => {
     if (!animal) return
     
-    setLoading(true)
     try {
       const records = await window.api.getHealthRecords(animal.id)
       setHealthRecords(records)
     } catch (error) {
       console.error('Error loading health records:', error)
       toast.error('Failed to load health records')
-    } finally {
-      setLoading(false)
     }
   }
 

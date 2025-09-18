@@ -25,7 +25,6 @@ export function AnimalViewDialog({
   onDeleteClick
 }: Props): ReactElement {
   const [healthRecords, setHealthRecords] = useState<AnimalHealthRecord[]>([])
-  const [loadingHealthRecords, setLoadingHealthRecords] = useState(false)
 
   useEffect(() => {
     if (animal && open) {
@@ -36,14 +35,11 @@ export function AnimalViewDialog({
   const loadHealthRecords = async () => {
     if (!animal) return
 
-    setLoadingHealthRecords(true)
     try {
       const records = await window.api.getHealthRecords(animal.id)
       setHealthRecords(records)
     } catch (error) {
       console.error('Error loading health records:', error)
-    } finally {
-      setLoadingHealthRecords(false)
     }
   }
 
