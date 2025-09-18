@@ -26,8 +26,8 @@ protocol.registerSchemesAsPrivileged([
 function createWindow(): void {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 900,
-    height: 670,
+    width: 1200,  // Initial width (will be overridden by maximize())
+    height: 800,  // Initial height (will be overridden by maximize())
     show: false,
     autoHideMenuBar: true,
     title: 'MyFarm',
@@ -41,6 +41,7 @@ function createWindow(): void {
   })
 
   mainWindow.on('ready-to-show', () => {
+    mainWindow.maximize() // Maximize the window to fill the screen
     mainWindow.show()
   })
 
