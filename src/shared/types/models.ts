@@ -50,3 +50,15 @@ export interface AnimalHealthRecord {
   created_at: string
   updated_at: string
 }
+
+export interface MilkProduction {
+  id: number
+  animal_id: number
+  date: string
+  morning_amount: number
+  evening_amount: number
+  total_amount: number
+  notes?: string
+  created_at: string
+  updated_at: string
+}

@@ -10,7 +10,11 @@ interface AnimalStats {
   mostCommonTypeCount: number
 }
 
-export function SummaryCards(): ReactElement {
+interface SummaryCardsProps {
+  onNavigate?: (path: string) => void
+}
+
+export function SummaryCards({ onNavigate }: SummaryCardsProps): ReactElement {
   const [stats, setStats] = useState<AnimalStats | null>(null)
   const [loading, setLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>(null)
@@ -42,7 +46,7 @@ export function SummaryCards(): ReactElement {
 
   return (
     <div>
-      <QuickActions />
+      <QuickActions onNavigate={onNavigate} />
       <div className="p-6">
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           <Card>

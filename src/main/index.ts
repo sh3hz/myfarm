@@ -10,6 +10,7 @@ import { registerFileHandlers } from './handlers/files'
 import { registerDocumentHandlers } from './handlers/documents'
 import { registerCashflowHandlers } from './handlers/cashflow'
 import { registerHealthRecordHandlers } from './handlers/healthRecords'
+import { registerMilkProductionHandlers } from './handlers/milkProduction'
 
 // Register protocol schemes before app is ready
 protocol.registerSchemesAsPrivileged([
@@ -178,6 +179,7 @@ app.whenReady().then(() => {
   registerDocumentHandlers()
   registerCashflowHandlers()
   registerHealthRecordHandlers()
+  registerMilkProductionHandlers()
 
   ipcMain.handle('get-app-info', async () => {
     try {

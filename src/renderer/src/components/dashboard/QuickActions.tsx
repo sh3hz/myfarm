@@ -1,10 +1,20 @@
 import { Button } from '../ui/button'
-import { PlusCircle } from 'lucide-react'
+import { PlusCircle, Milk } from 'lucide-react'
 import type { ReactElement } from 'react'
 
-export function QuickActions(): ReactElement {
+interface QuickActionsProps {
+  onNavigate?: (path: string) => void
+}
+
+export function QuickActions({ onNavigate }: QuickActionsProps): ReactElement {
   const handleAddAnimal = (): void => {
     window.dispatchEvent(new CustomEvent('open-animal-dialog'))
+  }
+
+  const handleAddMilkProduction = (): void => {
+    if (onNavigate) {
+      onNavigate('/milk-production')
+    }
   }
 
   return (
@@ -12,6 +22,10 @@ export function QuickActions(): ReactElement {
       <Button onClick={handleAddAnimal} variant="outline" className="gap-2">
         <PlusCircle className="h-4 w-4" />
         Add Animal
+      </Button>
+      <Button onClick={handleAddMilkProduction} variant="outline" className="gap-2">
+        <Milk className="h-4 w-4" />
+        Add Milk Production
       </Button>
     </div>
   )

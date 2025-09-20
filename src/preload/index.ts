@@ -59,7 +59,20 @@ const api = {
     ipcRenderer.invoke('get-health-records-by-type', animalId, recordType),
   createHealthRecord: (data: any) => ipcRenderer.invoke('create-health-record', data),
   updateHealthRecord: (id: number, data: any) => ipcRenderer.invoke('update-health-record', id, data),
-  deleteHealthRecord: (id: number) => ipcRenderer.invoke('delete-health-record', id)
+  deleteHealthRecord: (id: number) => ipcRenderer.invoke('delete-health-record', id),
+
+  // Milk Production API
+  getMilkProduction: () => ipcRenderer.invoke('get-milk-production'),
+  getMilkProductionByAnimal: (animalId: number) => ipcRenderer.invoke('get-milk-production-by-animal', animalId),
+  getMilkProductionByDateRange: (startDate: string, endDate: string) => 
+    ipcRenderer.invoke('get-milk-production-by-date-range', startDate, endDate),
+  getMilkProductionById: (id: number) => ipcRenderer.invoke('get-milk-production-by-id', id),
+  createMilkProduction: (data: any) => ipcRenderer.invoke('create-milk-production', data),
+  updateMilkProduction: (id: number, data: any) => ipcRenderer.invoke('update-milk-production', id, data),
+  deleteMilkProduction: (id: number) => ipcRenderer.invoke('delete-milk-production', id),
+  getMilkProductionStats: (animalId?: number) => ipcRenderer.invoke('get-milk-production-stats', animalId),
+  getMilkProductionChartData: (animalId?: number, days?: number) => 
+    ipcRenderer.invoke('get-milk-production-chart-data', animalId, days)
 }
 
 // Expose protected methods that allow the renderer process to use

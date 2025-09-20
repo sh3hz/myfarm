@@ -106,6 +106,27 @@ export function initDatabase(db: Database.Database): void {
   db.exec(`CREATE INDEX IF NOT EXISTS idx_animal_health_records_animal_id ON animal_health_records(animal_id)`)
   db.exec(`CREATE INDEX IF NOT EXISTS idx_animal_health_records_type ON animal_health_records(record_type)`)
 
+  // Create milk_production table
+  db.exec(`
+      CREATE TABLE IF NOT EXISTS milk_production (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        animal_id INTEGER NOT NULL,
+        date TEXT NOT NULL,
+        morning_amount REAL DEFAULT 0,
+        evening_amount REAL DEFAULT 0,
+        total_amount REAL GENERATED ALWAYS AS (morning_amount + evening_amount) STORED,
+        notes TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (animal_id) REFERENCES animals(id) ON DELETE CASCADE
+      )
+    `)
+
+  // Index for milk production lookups
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_milk_production_animal_id ON milk_production(animal_id)`)
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_milk_production_date ON milk_production(date)`)
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_milk_production_animal_date ON milk_production(animal_id, date)`)
+
   // Insert default app info atomically if table is empty
   db.prepare(
     `

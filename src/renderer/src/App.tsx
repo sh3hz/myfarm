@@ -4,6 +4,7 @@ import { Animals } from '@renderer/components/animals'
 import { SummaryCards } from '@renderer/components/dashboard'
 import { AnimalTypePie } from '@renderer/components/dashboard/charts'
 import { CashflowPage } from '@renderer/components/cashflow'
+import { MilkProductionPage } from '@renderer/components/milk-production'
 import { Toaster } from '@renderer/components/ui/sonner'
 
 function App(): React.JSX.Element {
@@ -38,13 +39,15 @@ function App(): React.JSX.Element {
         return (
           <div className="space-y-6">
             
-            <SummaryCards />
+            <SummaryCards onNavigate={setCurrentPath} />
             
             <AnimalTypePie />
           </div>
         )
       case '/animals':
         return <Animals ref={animalsRef} />
+      case '/milk-production':
+        return <MilkProductionPage />
       case '/cashflow':
         return <CashflowPage />
       default:

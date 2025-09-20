@@ -1,0 +1,1 @@
+export { MilkProductionPage } from './pages/MilkProductionPage'

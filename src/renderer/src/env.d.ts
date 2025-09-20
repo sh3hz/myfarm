@@ -82,5 +82,26 @@ interface Window {
     createHealthRecord: (data: any) => Promise<number>
     updateHealthRecord: (id: number, data: any) => Promise<any | undefined>
     deleteHealthRecord: (id: number) => Promise<void>
+    
+    // Milk Production API
+    getMilkProduction: () => Promise<any[]>
+    getMilkProductionByAnimal: (animalId: number) => Promise<any[]>
+    getMilkProductionByDateRange: (startDate: string, endDate: string) => Promise<any[]>
+    getMilkProductionById: (id: number) => Promise<any | null>
+    createMilkProduction: (data: any) => Promise<number>
+    updateMilkProduction: (id: number, data: any) => Promise<any | null>
+    deleteMilkProduction: (id: number) => Promise<void>
+    getMilkProductionStats: (animalId?: number) => Promise<{
+      totalRecords: number
+      totalProduction: number
+      averageDaily: number
+      lastWeekProduction: number
+    }>
+    getMilkProductionChartData: (animalId?: number, days?: number) => Promise<Array<{
+      date: string
+      total: number
+      morning: number
+      evening: number
+    }>>
   }
 }
