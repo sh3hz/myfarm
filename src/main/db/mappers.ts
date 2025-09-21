@@ -6,6 +6,8 @@ export function mapAnimalRow(row: any, documents?: string[]): Animal {
     id: row.id,
     name: row.name,
     breed: row.breed,
+    fatherBreed: row.father_breed,
+    motherBreed: row.mother_breed,
     age: row.age,
     type_id: row.type_id,
     description: row.description,
@@ -33,6 +35,8 @@ export function mapAnimalToDbParams(a: Partial<Animal>): Record<string, unknown>
   return {
     name: a.name,
     breed: a.breed,
+    father_breed: a.fatherBreed,
+    mother_breed: a.motherBreed,
     age: a.age ?? null,
     type_id: a.type_id,
     description: a.description,

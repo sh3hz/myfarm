@@ -90,6 +90,14 @@ export function AnimalViewDialog({
                   <span className="break-words">{animal?.breed || '-'}</span>
                 </div>
                 <div className="flex flex-col space-y-1">
+                  <span className="text-muted-foreground font-medium">Father's Breed:</span>
+                  <span className="break-words">{animal?.fatherBreed || '-'}</span>
+                </div>
+                <div className="flex flex-col space-y-1">
+                  <span className="text-muted-foreground font-medium">Mother's Breed:</span>
+                  <span className="break-words">{animal?.motherBreed || '-'}</span>
+                </div>
+                <div className="flex flex-col space-y-1">
                   <span className="text-muted-foreground font-medium">Gender:</span>
                   <span className="break-words">
                     {animal

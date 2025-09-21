@@ -49,7 +49,9 @@ const defaultAnimal: AnimalFormData = {
   acquisitionDate: '',
   acquisitionLocation: '',
   exitDate: '',
-  exitReason: ''
+  exitReason: '',
+  fatherBreed: '',
+  motherBreed: ''
 }
 
 interface AnimalsHandles {
@@ -308,6 +310,28 @@ export const AnimalsPage = forwardRef<AnimalsHandles, unknown>((_, ref): React.R
                       name="age"
                       type="number"
                       value={formData.age ?? ''}
+                      onChange={handleInputChange}
+                      className="h-9 text-sm"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <Label htmlFor="fatherBreed" className="text-xs font-medium">Father's Breed</Label>
+                    <Input
+                      id="fatherBreed"
+                      name="fatherBreed"
+                      value={formData.fatherBreed || ''}
+                      onChange={handleInputChange}
+                      className="h-9 text-sm"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="motherBreed" className="text-xs font-medium">Mother's Breed</Label>
+                    <Input
+                      id="motherBreed"
+                      name="motherBreed"
+                      value={formData.motherBreed || ''}
                       onChange={handleInputChange}
                       className="h-9 text-sm"
                     />

@@ -17,7 +17,7 @@ export async function getAll(): Promise<Animal[]> {
     `
     )
     .all()
-  
+
   // Load documents for each animal
   const animals = await Promise.all(
     rows.map(async (row: any) => {
@@ -25,7 +25,7 @@ export async function getAll(): Promise<Animal[]> {
       return mapAnimalRow(row, documents)
     })
   )
-  
+
   return animals
 }
 
@@ -45,7 +45,7 @@ export async function getById(id: number): Promise<Animal | undefined> {
     )
     .get(id)
   if (!row) return undefined
-  
+
   const documents = await documentsRepo.getDocumentsByAnimalId(id)
   return mapAnimalRow(row, documents)
 }
@@ -56,18 +56,20 @@ export async function create(data: Omit<Animal, 'id' | 'created_at' | 'updated_a
   const stmt = db.prepare(
     `
     INSERT INTO animals (
-      name, breed, age, type_id, description, image,
+      name, breed, father_breed, mother_breed, age, type_id, description, image,
       created_at, updated_at, tag_number, gender,
       date_of_birth, weight, height, acquisition_date,
       acquisition_location, exit_date, exit_reason
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `
   )
 
   const result = stmt.run(
     data.name,
     data.breed,
+    data.fatherBreed,
+    data.motherBreed,
     data.age ?? null,
     data.type_id,
     data.description,
@@ -110,7 +112,7 @@ export async function update(
     .prepare(
       `
       UPDATE animals
-      SET name = ?, breed = ?, age = ?, type_id = ?, description = ?, image = ?,
+      SET name = ?, breed = ?, father_breed = ?, mother_breed = ?, age = ?, type_id = ?, description = ?, image = ?,
           tag_number = ?, gender = ?, date_of_birth = ?, weight = ?, height = ?,
           acquisition_date = ?, acquisition_location = ?, exit_date = ?, exit_reason = ?,
           updated_at = ?
@@ -121,6 +123,8 @@ export async function update(
     .get(
       data.name ?? current.name,
       data.breed ?? current.breed,
+      data.fatherBreed ?? current.fatherBreed,
+      data.motherBreed ?? current.motherBreed,
       data.age ?? current.age,
       data.type_id ?? current.type_id,
       data.description ?? current.description,
@@ -142,7 +146,7 @@ export async function update(
   if (data.documents !== undefined) {
     // Remove all existing documents
     await documentsRepo.removeAllDocuments(id)
-    
+
     // Add new documents
     if (data.documents.length > 0) {
       for (const filename of data.documents) {
@@ -156,14 +160,14 @@ export async function update(
 
 export async function remove(id: number): Promise<void> {
   const db = getDb()
-  
+
   // Get animal data before deletion to clean up files
   const animal = await getById(id)
   if (!animal) return
-  
+
   // Clean up associated files
   await cleanupAnimalFiles(animal)
-  
+
   // Documents will be automatically deleted due to CASCADE constraint
   db.prepare('DELETE FROM animals WHERE id = ?').run(id)
 }
@@ -172,7 +176,7 @@ async function cleanupAnimalFiles(animal: Animal): Promise<void> {
   const fs = await import('fs')
   const path = await import('path')
   const { app } = await import('electron')
-  
+
   try {
     // Clean up image file
     if (animal.image) {
@@ -182,11 +186,11 @@ async function cleanupAnimalFiles(animal: Animal): Promise<void> {
         console.log(`Deleted image file: ${imagePath}`)
       }
     }
-    
+
     // Clean up document files
     if (animal.documents && animal.documents.length > 0) {
       const documentsDir = path.join(app.getPath('userData'), 'documents')
-      
+
       for (const filename of animal.documents) {
         const documentPath = path.join(documentsDir, filename)
         if (fs.existsSync(documentPath)) {
@@ -229,11 +233,11 @@ export async function getStats(): Promise<{
     `
     )
     .get() as {
-    totalTypes: number
-    totalAnimals: number
-    mostCommonType: string | null
-    mostCommonTypeCount: number
-  } | undefined
+      totalTypes: number
+      totalAnimals: number
+      mostCommonType: string | null
+      mostCommonTypeCount: number
+    } | undefined
 
   return {
     totalTypes: row?.totalTypes ?? 0,

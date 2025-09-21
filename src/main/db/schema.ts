@@ -20,6 +20,8 @@ export function initDatabase(db: Database.Database): void {
         tag_number TEXT,
         name TEXT NOT NULL,
         breed TEXT,
+        father_breed TEXT,
+        mother_breed TEXT,
         gender TEXT NOT NULL DEFAULT 'UNKNOWN' CHECK(gender IN ('MALE', 'FEMALE', 'CASTRATED', 'UNKNOWN')),
         date_of_birth TEXT,
         weight REAL,
@@ -126,6 +128,19 @@ export function initDatabase(db: Database.Database): void {
   db.exec(`CREATE INDEX IF NOT EXISTS idx_milk_production_animal_id ON milk_production(animal_id)`)
   db.exec(`CREATE INDEX IF NOT EXISTS idx_milk_production_date ON milk_production(date)`)
   db.exec(`CREATE INDEX IF NOT EXISTS idx_milk_production_animal_date ON milk_production(animal_id, date)`)
+
+  // Add father_breed and mother_breed columns if they don't exist (migration)
+  try {
+    db.exec(`ALTER TABLE animals ADD COLUMN father_breed TEXT`)
+  } catch (error) {
+    // Column already exists, ignore error
+  }
+  
+  try {
+    db.exec(`ALTER TABLE animals ADD COLUMN mother_breed TEXT`)
+  } catch (error) {
+    // Column already exists, ignore error
+  }
 
   // Insert default app info atomically if table is empty
   db.prepare(

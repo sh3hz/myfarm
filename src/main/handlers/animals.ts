@@ -73,6 +73,8 @@ export function registerAnimalHandlers(): void {
         Tag: a.tagNumber ?? '',
         Name: a.name,
         Breed: a.breed ?? '',
+        FatherBreed: a.fatherBreed ?? '',
+        MotherBreed: a.motherBreed ?? '',
         Gender: a.gender,
         Age: a.age ?? '',
         Type: a.type?.name ?? '',

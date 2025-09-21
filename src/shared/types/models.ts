@@ -20,6 +20,8 @@ export interface Animal {
   tagNumber?: string
   name: string
   breed?: string
+  fatherBreed?: string
+  motherBreed?: string
   gender: Gender
   dateOfBirth?: string
   weight?: number
