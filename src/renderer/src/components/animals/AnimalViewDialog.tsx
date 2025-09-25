@@ -4,7 +4,7 @@ import { Button } from '../ui/button'
 import { Badge } from '../ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
 import type { Animal, AnimalHealthRecord } from '../../../../shared/types/models'
-import { PawPrint, FileText, Heart, Pill } from 'lucide-react'
+import { PawPrint, FileText, Heart, Pill, Calendar, Weight, Ruler, MapPin } from 'lucide-react'
 import type { ReactElement } from 'react'
 
 interface Props {
@@ -49,17 +49,23 @@ export function AnimalViewDialog({
 
   const inseminationRecords = healthRecords.filter(r => r.record_type === 'insemination')
   const dewormingRecords = healthRecords.filter(r => r.record_type === 'deworming')
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[95vh] w-[95vw] sm:w-[90vw] overflow-hidden flex flex-col">
-        <DialogHeader className="flex-shrink-0">
-          <DialogTitle className="text-lg sm:text-xl truncate">{animal?.name}</DialogTitle>
+      <DialogContent className="max-w-[95vw] max-h-[90vh] w-[98vw] sm:w-[95vw] lg:w-[85vw] xl:max-w-7xl overflow-hidden flex flex-col">
+        <DialogHeader className="flex-shrink-0 pb-4">
+          <DialogTitle className="text-2xl font-bold">{animal?.name}</DialogTitle>
+          {animal?.description && (
+            <p className="text-muted-foreground text-base mt-2">{animal.description}</p>
+          )}
         </DialogHeader>
+
         <div className="flex-1 overflow-y-auto">
-          <div className="space-y-4 p-2">
-            {/* Image Section */}
-            <div className="flex justify-center">
-              <div className="relative w-full aspect-square max-w-48 sm:max-w-56 rounded-lg bg-muted overflow-hidden flex items-center justify-center">
+          <div className="grid grid-cols-12 gap-6 h-full">
+            {/* Left Column - Image and Quick Info */}
+            <div className="col-span-4 space-y-4">
+              {/* Animal Image */}
+              <div className="aspect-square rounded-lg bg-muted overflow-hidden flex items-center justify-center">
                 {imageSrc ? (
                   <img
                     src={imageSrc}
@@ -67,219 +73,260 @@ export function AnimalViewDialog({
                     className="object-cover w-full h-full"
                   />
                 ) : (
-                  <PawPrint className="w-16 h-16 sm:w-20 sm:h-20 text-muted-foreground" />
+                  <PawPrint className="w-24 h-24 text-muted-foreground" />
                 )}
               </div>
-            </div>
 
-            {/* Description */}
-            <div className="text-sm text-muted-foreground break-words text-center">
-              {animal?.description || 'No description provided.'}
-            </div>
-
-            {/* Animal Details */}
-            <div className="space-y-4 text-sm">
-              {/* Basic Info Grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                <div className="flex flex-col space-y-1">
-                  <span className="text-muted-foreground font-medium">Tag:</span>
-                  <span className="break-words">{animal?.tagNumber || '-'}</span>
-                </div>
-                <div className="flex flex-col space-y-1">
-                  <span className="text-muted-foreground font-medium">Breed:</span>
-                  <span className="break-words">{animal?.breed || '-'}</span>
-                </div>
-                <div className="flex flex-col space-y-1">
-                  <span className="text-muted-foreground font-medium">Father's Breed:</span>
-                  <span className="break-words">{animal?.fatherBreed || '-'}</span>
-                </div>
-                <div className="flex flex-col space-y-1">
-                  <span className="text-muted-foreground font-medium">Mother's Breed:</span>
-                  <span className="break-words">{animal?.motherBreed || '-'}</span>
-                </div>
-                <div className="flex flex-col space-y-1">
-                  <span className="text-muted-foreground font-medium">Gender:</span>
-                  <span className="break-words">
-                    {animal
-                      ? animal.gender === 'MALE'
-                        ? 'Male'
-                        : animal.gender === 'FEMALE'
-                          ? 'Female'
-                          : animal.gender === 'CASTRATED'
-                            ? 'Castrated'
-                            : 'Unknown'
-                      : '-'}
-                  </span>
-                </div>
-                <div className="flex flex-col space-y-1">
-                  <span className="text-muted-foreground font-medium">Age:</span>
-                  <span className="break-words">{animal?.age && animal.age > 0 ? `${animal.age} yrs` : '-'}</span>
-                </div>
-              </div>
-
-              {/* Secondary Info Grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                <div className="flex flex-col space-y-1">
-                  <span className="text-muted-foreground font-medium">Type:</span>
-                  <span className="break-words">{animal?.type?.name || '-'}</span>
-                </div>
-                <div className="flex flex-col space-y-1">
-                  <span className="text-muted-foreground font-medium">Date of Birth:</span>
-                  <span className="break-words">
-                    {animal?.dateOfBirth ? new Date(animal.dateOfBirth).toLocaleDateString() : '-'}
-                  </span>
-                </div>
-                <div className="flex flex-col space-y-1">
-                  <span className="text-muted-foreground font-medium">Weight:</span>
-                  <span className="break-words">{animal?.weight ? `${animal.weight} kg` : '-'}</span>
-                </div>
-                <div className="flex flex-col space-y-1">
-                  <span className="text-muted-foreground font-medium">Height:</span>
-                  <span className="break-words">{animal?.height ? `${animal.height} cm` : '-'}</span>
-                </div>
-              </div>
-
-              {/* Acquisition & Exit Info */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <div className="flex flex-col space-y-1">
-                  <span className="text-muted-foreground font-medium">Acquisition Date:</span>
-                  <span className="break-words">{animal?.acquisitionDate ? new Date(animal.acquisitionDate).toLocaleDateString() : '-'}</span>
-                </div>
-                <div className="flex flex-col space-y-1">
-                  <span className="text-muted-foreground font-medium">Exit Date:</span>
-                  <span className="break-words">{animal?.exitDate ? new Date(animal.exitDate).toLocaleDateString() : '-'}</span>
-                </div>
-                {animal?.acquisitionLocation && (
-                  <div className="flex flex-col space-y-1">
-                    <span className="text-muted-foreground font-medium">Acquisition Location:</span>
-                    <span className="break-words">{animal.acquisitionLocation}</span>
+              {/* Quick Stats Card */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg">Quick Stats</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <Calendar className="w-4 h-4 text-muted-foreground" />
+                    <div>
+                      <p className="text-sm font-medium">Age</p>
+                      <p className="text-sm text-muted-foreground">
+                        {animal?.age && animal.age > 0 ? `${animal.age} years` : 'Unknown'}
+                      </p>
+                    </div>
                   </div>
-                )}
-                {animal?.exitReason && (
-                  <div className="flex flex-col space-y-1">
-                    <span className="text-muted-foreground font-medium">Exit Reason:</span>
-                    <span className="break-words">{animal.exitReason}</span>
+                  <div className="flex items-center gap-3">
+                    <Weight className="w-4 h-4 text-muted-foreground" />
+                    <div>
+                      <p className="text-sm font-medium">Weight</p>
+                      <p className="text-sm text-muted-foreground">
+                        {animal?.weight ? `${animal.weight} kg` : 'Not recorded'}
+                      </p>
+                    </div>
                   </div>
-                )}
-              </div>
+                  <div className="flex items-center gap-3">
+                    <Ruler className="w-4 h-4 text-muted-foreground" />
+                    <div>
+                      <p className="text-sm font-medium">Height</p>
+                      <p className="text-sm text-muted-foreground">
+                        {animal?.height ? `${animal.height} cm` : 'Not recorded'}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
 
+              {/* Documents */}
               {animal?.documents && animal.documents.length > 0 && (
-                <div className="space-y-2">
-                  <span className="text-muted-foreground font-medium">Documents:</span>
-                  <div className="flex flex-wrap gap-1">
-                    {animal.documents.map((doc, index) => {
-                      const displayName = doc.replace(/_\d+(\.[^.]+)?$/, '$1')
-                      const truncatedName = displayName.length > 20
-                        ? `${displayName.substring(0, 17)}...`
-                        : displayName
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <FileText className="w-4 h-4" />
+                      Documents
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      {animal.documents.map((doc, index) => {
+                        const displayName = doc.replace(/_\d+(\.[^.]+)?$/, '$1')
+                        return (
+                          <Badge
+                            key={index}
+                            variant="secondary"
+                            className="w-full justify-start cursor-pointer hover:bg-secondary/80 transition-colors p-2"
+                            onClick={async () => {
+                              try {
+                                await window.api.openDocument(doc)
+                              } catch (error) {
+                                console.error('Error opening document:', error)
+                              }
+                            }}
+                            title={`Click to open: ${displayName}`}
+                          >
+                            <FileText className="w-3 h-3 mr-2" />
+                            <span className="truncate text-xs">{displayName}</span>
+                          </Badge>
+                        )
+                      })}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
 
-                      return (
-                        <Badge
-                          key={index}
-                          variant="secondary"
-                          className="text-xs cursor-pointer hover:bg-secondary/80 transition-colors max-w-full"
-                          onClick={async () => {
-                            try {
-                              await window.api.openDocument(doc)
-                            } catch (error) {
-                              console.error('Error opening document:', error)
-                            }
-                          }}
-                          title={`Click to open: ${displayName}`}
-                        >
-                          <FileText className="w-3 h-3 mr-1 flex-shrink-0" />
-                          <span className="truncate">{truncatedName}</span>
-                        </Badge>
-                      )
-                    })}
+            {/* Right Column - Detailed Information */}
+            <div className="col-span-8 space-y-6">
+              {/* Basic Information */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg">Basic Information</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-3 gap-6">
+                    <div className="space-y-4">
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">Tag Number</p>
+                        <p className="text-sm mt-1">{animal?.tagNumber || '-'}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">Gender</p>
+                        <p className="text-sm mt-1">
+                          {animal
+                            ? animal.gender === 'MALE'
+                              ? 'Male'
+                              : animal.gender === 'FEMALE'
+                                ? 'Female'
+                                : animal.gender === 'CASTRATED'
+                                  ? 'Castrated'
+                                  : 'Unknown'
+                            : '-'}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">Type</p>
+                        <p className="text-sm mt-1">{animal?.type?.name || '-'}</p>
+                      </div>
+                    </div>
+                    <div className="space-y-4">
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">Breed</p>
+                        <p className="text-sm mt-1">{animal?.breed || '-'}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">Father's Breed</p>
+                        <p className="text-sm mt-1">{animal?.fatherBreed || '-'}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">Mother's Breed</p>
+                        <p className="text-sm mt-1">{animal?.motherBreed || '-'}</p>
+                      </div>
+                    </div>
+                    <div className="space-y-4">
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">Date of Birth</p>
+                        <p className="text-sm mt-1">
+                          {animal?.dateOfBirth ? formatDate(animal.dateOfBirth) : '-'}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">Acquisition Date</p>
+                        <p className="text-sm mt-1">
+                          {animal?.acquisitionDate ? formatDate(animal.acquisitionDate) : '-'}
+                        </p>
+                      </div>
+                      {animal?.acquisitionLocation && (
+                        <div>
+                          <p className="text-sm font-medium text-muted-foreground">Acquisition Location</p>
+                          <p className="text-sm mt-1">{animal.acquisitionLocation}</p>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
+                </CardContent>
+              </Card>
+
+              {/* Exit Information (if applicable) */}
+              {(animal?.exitDate || animal?.exitReason) && (
+                <Card className="border-orange-200 dark:border-orange-800">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <MapPin className="w-4 h-4 text-orange-500" />
+                      Exit Information
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 gap-6">
+                      {animal?.exitDate && (
+                        <div>
+                          <p className="text-sm font-medium text-muted-foreground">Exit Date</p>
+                          <p className="text-sm mt-1">{formatDate(animal.exitDate)}</p>
+                        </div>
+                      )}
+                      {animal?.exitReason && (
+                        <div>
+                          <p className="text-sm font-medium text-muted-foreground">Exit Reason</p>
+                          <p className="text-sm mt-1">{animal.exitReason}</p>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
               )}
 
-              {/* Health Records Section */}
+              {/* Health Records */}
               {(inseminationRecords.length > 0 || dewormingRecords.length > 0) && (
-                <div className="space-y-3">
-                  <span className="text-muted-foreground font-medium">Health Records:</span>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Insemination Records */}
-                    {inseminationRecords.length > 0 && (
-                      <Card className="border-pink-200 dark:border-pink-800">
-                        <CardHeader className="pb-2">
-                          <CardTitle className="text-sm flex items-center gap-2">
-                            <Heart className="h-4 w-4 text-pink-500" />
-                            Insemination Records
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-2">
-                          {inseminationRecords.slice(0, 3).map((record) => (
-                            <div key={record.id} className="text-xs space-y-1 p-2 bg-muted/50 rounded">
-                              <div className="font-medium">
-                                Date: {formatDate(record.date)}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg">Health Records</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 gap-4">
+                      {/* Insemination Records */}
+                      {inseminationRecords.length > 0 && (
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-2 text-pink-600 dark:text-pink-400">
+                            <Heart className="h-4 w-4" />
+                            <h4 className="font-medium">Insemination Records</h4>
+                          </div>
+                          <div className="space-y-2 max-h-48 overflow-y-auto">
+                            {inseminationRecords.map((record) => (
+                              <div key={record.id} className="p-3 bg-muted/50 rounded-lg space-y-1">
+                                <div className="text-sm font-medium">
+                                  {formatDate(record.date)}
+                                </div>
+                                {record.expected_delivery_date && (
+                                  <div className="text-xs text-muted-foreground">
+                                    Expected delivery: {formatDate(record.expected_delivery_date)}
+                                  </div>
+                                )}
+                                {record.notes && (
+                                  <div className="text-xs text-muted-foreground">
+                                    {record.notes}
+                                  </div>
+                                )}
                               </div>
-                              {record.expected_delivery_date && (
-                                <div className="text-muted-foreground">
-                                  Expected delivery: {formatDate(record.expected_delivery_date)}
-                                </div>
-                              )}
-                              {record.notes && (
-                                <div className="text-muted-foreground">
-                                  Notes: {record.notes}
-                                </div>
-                              )}
-                            </div>
-                          ))}
-                          {inseminationRecords.length > 3 && (
-                            <div className="text-xs text-muted-foreground text-center">
-                              +{inseminationRecords.length - 3} more records
-                            </div>
-                          )}
-                        </CardContent>
-                      </Card>
-                    )}
+                            ))}
+                          </div>
+                        </div>
+                      )}
 
-                    {/* Deworming Records */}
-                    {dewormingRecords.length > 0 && (
-                      <Card className="border-green-200 dark:border-green-800">
-                        <CardHeader className="pb-2">
-                          <CardTitle className="text-sm flex items-center gap-2">
-                            <Pill className="h-4 w-4 text-green-500" />
-                            Deworming Records
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-2">
-                          {dewormingRecords.slice(0, 3).map((record) => (
-                            <div key={record.id} className="text-xs space-y-1 p-2 bg-muted/50 rounded">
-                              <div className="font-medium">
-                                Date: {formatDate(record.date)}
-                              </div>
-                              {record.notes && (
-                                <div className="text-muted-foreground">
-                                  Notes: {record.notes}
+                      {/* Deworming Records */}
+                      {dewormingRecords.length > 0 && (
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
+                            <Pill className="h-4 w-4" />
+                            <h4 className="font-medium">Deworming Records</h4>
+                          </div>
+                          <div className="space-y-2 max-h-48 overflow-y-auto">
+                            {dewormingRecords.map((record) => (
+                              <div key={record.id} className="p-3 bg-muted/50 rounded-lg space-y-1">
+                                <div className="text-sm font-medium">
+                                  {formatDate(record.date)}
                                 </div>
-                              )}
-                            </div>
-                          ))}
-                          {dewormingRecords.length > 3 && (
-                            <div className="text-xs text-muted-foreground text-center">
-                              +{dewormingRecords.length - 3} more records
-                            </div>
-                          )}
-                        </CardContent>
-                      </Card>
-                    )}
-                  </div>
-                </div>
+                                {record.notes && (
+                                  <div className="text-xs text-muted-foreground">
+                                    {record.notes}
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
               )}
             </div>
           </div>
         </div>
-        <DialogFooter className="gap-2 flex-shrink-0 flex-col sm:flex-row">
-          <div className="flex flex-col sm:flex-row gap-2 w-full">
+
+        <div className="border-t my-4" />
+
+        <DialogFooter className="flex-shrink-0">
+          <div className="flex justify-between w-full">
             {onDeleteClick && animal && (
               <Dialog>
                 <DialogTrigger asChild>
-                  <Button variant="destructive" className="sm:mr-auto">
-                    Delete
+                  <Button variant="destructive">
+                    Delete Animal
                   </Button>
                 </DialogTrigger>
                 <DialogContent>
@@ -304,20 +351,17 @@ export function AnimalViewDialog({
                 </DialogContent>
               </Dialog>
             )}
-            <div className="flex flex-col sm:flex-row gap-2 sm:ml-auto">
+            <div className="flex gap-3">
               {onEditClick && animal && (
                 <Button
                   variant="outline"
                   onClick={() => onEditClick(animal)}
-                  className="w-full sm:w-auto"
                 >
-                  Edit
+                  Edit Animal
                 </Button>
               )}
               <Button
-                variant="outline"
                 onClick={() => onOpenChange(false)}
-                className="w-full sm:w-auto"
               >
                 Close
               </Button>

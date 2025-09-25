@@ -137,14 +137,14 @@ export function AnimalHealthModal({ animal, open, onClose }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-7xl max-h-[90vh] w-[95vw] overflow-y-auto">
+      <DialogContent className="max-w-[95vw] max-h-[90vh] w-[98vw] sm:w-[95vw] lg:w-[85vw] xl:max-w-7xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             Health Records - {animal?.name}
           </DialogTitle>
         </DialogHeader>
 
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Insemination Section */}
           <Card>
             <CardHeader>

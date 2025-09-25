@@ -283,6 +283,16 @@ export const AnimalsPage = forwardRef<AnimalsHandles, unknown>((_, ref): React.R
                 <h3 className="font-medium text-sm">Basic Information</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div className="space-y-1">
+                    <Label htmlFor="tagNumber" className="text-xs font-medium">Tag Number</Label>
+                    <Input
+                      id="tagNumber"
+                      name="tagNumber"
+                      value={formData.tagNumber}
+                      onChange={handleInputChange}
+                      className="h-9 text-sm"
+                    />
+                  </div>
+                  <div className="space-y-1">
                     <Label htmlFor="name" className="text-xs font-medium">Name *</Label>
                     <Input
                       id="name"
@@ -303,6 +313,8 @@ export const AnimalsPage = forwardRef<AnimalsHandles, unknown>((_, ref): React.R
                       className="h-9 text-sm"
                     />
                   </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="space-y-1">
                     <Label htmlFor="age" className="text-xs font-medium">Age</Label>
                     <Input
@@ -342,7 +354,7 @@ export const AnimalsPage = forwardRef<AnimalsHandles, unknown>((_, ref): React.R
               {/* Type and Identification Section */}
               <div className="space-y-3">
                 <h3 className="font-medium text-sm">Type & Identification</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="space-y-1">
                     <Label htmlFor="type_id" className="text-xs font-medium">Animal Type *</Label>
                     <div className="flex space-x-2">
@@ -384,16 +396,6 @@ export const AnimalsPage = forwardRef<AnimalsHandles, unknown>((_, ref): React.R
                         <Plus className="h-4 w-4" />
                       </Button>
                     </div>
-                  </div>
-                  <div className="space-y-1">
-                    <Label htmlFor="tagNumber" className="text-xs font-medium">Tag Number</Label>
-                    <Input
-                      id="tagNumber"
-                      name="tagNumber"
-                      value={formData.tagNumber}
-                      onChange={handleInputChange}
-                      className="h-9 text-sm"
-                    />
                   </div>
                   <div className="space-y-1">
                     <Label htmlFor="gender" className="text-xs font-medium">Gender</Label>

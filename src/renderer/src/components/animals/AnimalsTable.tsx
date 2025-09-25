@@ -18,8 +18,8 @@ export function AnimalsTable({ animals, imagePaths, onView, onHealthRecord }: Pr
       <TableHeader>
         <TableRow>
           <TableHead>Image</TableHead>
-          <TableHead>Name</TableHead>
           <TableHead>Tag</TableHead>
+          <TableHead>Name</TableHead>
           <TableHead>Breed</TableHead>
           <TableHead>Gender</TableHead>
           <TableHead>Age</TableHead>
@@ -39,16 +39,16 @@ export function AnimalsTable({ animals, imagePaths, onView, onHealthRecord }: Pr
               <AnimalAvatar src={animal.image ? imagePaths[animal.image] : undefined} alt={animal.name} size="sm" />
             </TableCell>
             <TableCell 
-              className="font-medium cursor-pointer"
-              onClick={() => onView(animal)}
-            >
-              {animal.name}
-            </TableCell>
-            <TableCell 
               className="font-mono text-xs cursor-pointer"
               onClick={() => onView(animal)}
             >
               {animal.tagNumber}
+            </TableCell>
+            <TableCell 
+              className="font-medium cursor-pointer"
+              onClick={() => onView(animal)}
+            >
+              {animal.name}
             </TableCell>
             <TableCell 
               className="cursor-pointer"
