@@ -1,5 +1,5 @@
 import { Button } from '../ui/button'
-import { PlusCircle, Milk } from 'lucide-react'
+import { PlusCircle, Milk, TrendingUp, Calendar } from 'lucide-react'
 import type { ReactElement } from 'react'
 
 interface QuickActionsProps {
@@ -17,7 +17,11 @@ export function QuickActions({ onNavigate }: QuickActionsProps): ReactElement {
     }
   }
 
-
+  const handleViewCashflow = (): void => {
+    if (onNavigate) {
+      onNavigate('/cashflow')
+    }
+  }
 
   const handleViewAnimals = (): void => {
     if (onNavigate) {
@@ -35,7 +39,12 @@ export function QuickActions({ onNavigate }: QuickActionsProps): ReactElement {
         <Milk className="h-4 w-4" />
         Add Milk Production
       </Button>
+      <Button onClick={handleViewCashflow} variant="outline" className="gap-2">
+        <TrendingUp className="h-4 w-4" />
+        View Cashflow
+      </Button>
       <Button onClick={handleViewAnimals} variant="outline" className="gap-2">
+        <Calendar className="h-4 w-4" />
         Manage Animals
       </Button>
     </div>

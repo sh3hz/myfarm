@@ -8,8 +8,6 @@ import { MilkProductionPage } from '@renderer/components/milk-production'
 import { Toaster } from '@renderer/components/ui/sonner'
 
 function App(): React.JSX.Element {
-  
-
   const [currentPath, setCurrentPath] = useState('/')
   const animalsRef = useRef<{ openDialog: () => void }>(null)
 
@@ -53,16 +51,17 @@ function App(): React.JSX.Element {
 
             {/* Main Content Grid */}
             <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
-              {/* Left Column - Summary Cards and Events */}
+              {/* Left Column - Summary Cards (takes more space) */}
               <div className="xl:col-span-8 space-y-6">
-                {/* Summary Cards */}
+                {/* Summary Cards - Remove internal padding since we handle it here */}
                 <div className="space-y-4">
                   <h2 className="text-xl font-semibold">Farm Overview</h2>
                   <SummaryCards onNavigate={setCurrentPath} />
                 </div>
 
-                {/* Upcoming Events */}
+                {/* Upcoming Events - Full width on desktop */}
                 <div className="space-y-4">
+                  <h2 className="text-xl font-semibold">Upcoming Events</h2>
                   <UpcomingEvents />
                 </div>
               </div>
@@ -73,6 +72,14 @@ function App(): React.JSX.Element {
                   <h2 className="text-xl font-semibold">Analytics</h2>
                   <AnimalTypePie />
                 </div>
+
+                {/* Future: Add more analytics widgets here */}
+                {/* 
+                <div className="space-y-4">
+                  <h2 className="text-xl font-semibold">Recent Activity</h2>
+                  <RecentActivity />
+                </div>
+                */}
               </div>
             </div>
           </div>

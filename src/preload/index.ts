@@ -60,6 +60,7 @@ const api = {
   createHealthRecord: (data: any) => ipcRenderer.invoke('create-health-record', data),
   updateHealthRecord: (id: number, data: any) => ipcRenderer.invoke('update-health-record', id, data),
   deleteHealthRecord: (id: number) => ipcRenderer.invoke('delete-health-record', id),
+  getUpcomingEvents: () => ipcRenderer.invoke('get-upcoming-events'),
 
   // Milk Production API
   getMilkProduction: () => ipcRenderer.invoke('get-milk-production'),

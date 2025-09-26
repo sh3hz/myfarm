@@ -101,3 +101,31 @@ export async function getHealthRecordById(id: number): Promise<AnimalHealthRecor
   
   return row
 }
+
+export async function getUpcomingEvents(): Promise<(AnimalHealthRecord & { animal_name: string })[]> {
+  const db = getDb()
+  const today = new Date().toISOString().split('T')[0]
+  
+  const rows = db
+    .prepare(
+      `
+      SELECT 
+        ahr.*,
+        a.name as animal_name
+      FROM animal_health_records ahr
+      JOIN animals a ON ahr.animal_id = a.id
+      WHERE 
+        (ahr.record_type = 'insemination' AND ahr.expected_delivery_date IS NOT NULL AND ahr.expected_delivery_date >= ?)
+        OR (ahr.record_type = 'deworming' AND ahr.date >= ?)
+      ORDER BY 
+        CASE 
+          WHEN ahr.record_type = 'insemination' THEN ahr.expected_delivery_date
+          ELSE ahr.date
+        END ASC
+      LIMIT 10
+      `
+    )
+    .all(today, today) as (AnimalHealthRecord & { animal_name: string })[]
+  
+  return rows
+}

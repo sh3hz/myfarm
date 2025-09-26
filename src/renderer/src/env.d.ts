@@ -82,6 +82,7 @@ interface Window {
     createHealthRecord: (data: any) => Promise<number>
     updateHealthRecord: (id: number, data: any) => Promise<any | undefined>
     deleteHealthRecord: (id: number) => Promise<void>
+    getUpcomingEvents: () => Promise<(any & { animal_name: string })[]>
     
     // Milk Production API
     getMilkProduction: () => Promise<any[]>

@@ -129,7 +129,11 @@ export function AnimalHealthModal({ animal, open, onClose }: Props) {
   }
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString()
+    const date = new Date(dateString)
+    const day = date.getDate().toString().padStart(2, '0')
+    const month = date.toLocaleDateString('en-US', { month: 'short' })
+    const year = date.getFullYear()
+    return `${day} ${month} ${year}`
   }
 
   const inseminationRecords = healthRecords.filter(r => r.record_type === 'insemination')
