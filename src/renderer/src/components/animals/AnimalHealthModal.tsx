@@ -47,7 +47,7 @@ export function AnimalHealthModal({ animal, open, onClose }: Props) {
 
   const loadHealthRecords = async () => {
     if (!animal) return
-    
+
     try {
       const records = await window.api.getHealthRecords(animal.id)
       setHealthRecords(records)
@@ -68,19 +68,19 @@ export function AnimalHealthModal({ animal, open, onClose }: Props) {
         animal_id: animal.id,
         record_type: 'insemination',
         date: format(inseminationForm.date, 'yyyy-MM-dd'),
-        expected_delivery_date: inseminationForm.expected_delivery_date 
-          ? format(inseminationForm.expected_delivery_date, 'yyyy-MM-dd') 
+        expected_delivery_date: inseminationForm.expected_delivery_date
+          ? format(inseminationForm.expected_delivery_date, 'yyyy-MM-dd')
           : undefined,
         notes: inseminationForm.notes || undefined
       })
-      
+
       setInseminationForm({
         record_type: 'insemination',
         date: undefined,
         expected_delivery_date: undefined,
         notes: ''
       })
-      
+
       await loadHealthRecords()
       toast.success('Insemination record added successfully')
     } catch (error) {
@@ -102,13 +102,13 @@ export function AnimalHealthModal({ animal, open, onClose }: Props) {
         date: format(dewormingForm.date, 'yyyy-MM-dd'),
         notes: dewormingForm.notes || undefined
       })
-      
+
       setDewormingForm({
         record_type: 'deworming',
         date: undefined,
         notes: ''
       })
-      
+
       await loadHealthRecords()
       toast.success('Deworming record added successfully')
     } catch (error) {
@@ -180,8 +180,8 @@ export function AnimalHealthModal({ animal, open, onClose }: Props) {
                           selected={inseminationForm.date}
                           onSelect={(date) => setInseminationForm(prev => ({ ...prev, date }))}
                           captionLayout="dropdown"
-                          fromYear={1990}
-                          toYear={new Date().getFullYear() + 1}
+                          fromYear={1900}
+                          toYear={2050}
                           initialFocus
                         />
                       </PopoverContent>
@@ -220,8 +220,8 @@ export function AnimalHealthModal({ animal, open, onClose }: Props) {
                           selected={inseminationForm.expected_delivery_date}
                           onSelect={(date) => setInseminationForm(prev => ({ ...prev, expected_delivery_date: date }))}
                           captionLayout="dropdown"
-                          fromYear={new Date().getFullYear()}
-                          toYear={new Date().getFullYear() + 2}
+                          fromYear={1900}
+                          toYear={2050}
                           initialFocus
                         />
                       </PopoverContent>
@@ -324,8 +324,8 @@ export function AnimalHealthModal({ animal, open, onClose }: Props) {
                           selected={dewormingForm.date}
                           onSelect={(date) => setDewormingForm(prev => ({ ...prev, date }))}
                           captionLayout="dropdown"
-                          fromYear={1990}
-                          toYear={new Date().getFullYear() + 1}
+                          fromYear={1900}
+                          toYear={2050}
                           initialFocus
                         />
                       </PopoverContent>
