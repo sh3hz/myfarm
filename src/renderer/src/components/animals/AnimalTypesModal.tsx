@@ -35,18 +35,18 @@ interface AnimalTypesModalProps {
   onTypeAdded?: () => Promise<void>
 }
 
-export function AnimalTypesModal({ 
-  open, 
-  onOpenChange, 
-  onTypeSelect, 
-  onTypeAdded 
+export function AnimalTypesModal({
+  open,
+  onOpenChange,
+  onTypeSelect,
+  onTypeAdded
 }: AnimalTypesModalProps): React.JSX.Element {
   const [animalTypes, setAnimalTypes] = useState<AnimalType[]>([])
   const [isAdding, setIsAdding] = useState(false)
-  const [newType, setNewType] = useState<Omit<AnimalType, 'id'>>({ 
-    name: '', 
+  const [newType, setNewType] = useState<Omit<AnimalType, 'id'>>({
+    name: '',
     description: '',
-    isEditing: true 
+    isEditing: true
   })
 
   const loadAnimalTypes = async (): Promise<void> => {
@@ -68,8 +68,8 @@ export function AnimalTypesModal({
     if (id === 'new') {
       setNewType(prev => ({ ...prev, [field]: e.target.value }))
     } else {
-      setAnimalTypes(prev => 
-        prev.map(type => 
+      setAnimalTypes(prev =>
+        prev.map(type =>
           type.id === id ? { ...type, [field]: e.target.value } : type
         )
       )
@@ -141,14 +141,14 @@ export function AnimalTypesModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-[95vw] max-h-[85vh] w-[98vw] sm:w-[95vw] md:w-[90vw] lg:w-[85vw] xl:w-[80vw] 2xl:max-w-6xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Manage Animal Types</DialogTitle>
           <DialogDescription>
             Add, edit, or remove animal types from the system.
           </DialogDescription>
         </DialogHeader>
-        
+
         <div className="space-y-4">
           <div className="flex justify-between items-center">
             <h3 className="text-lg font-medium">Animal Types</h3>
