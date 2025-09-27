@@ -12,7 +12,7 @@ export async function getHealthRecordsByAnimalId(animalId: number): Promise<Anim
       `
     )
     .all(animalId) as AnimalHealthRecord[]
-  
+
   return rows
 }
 
@@ -27,14 +27,14 @@ export async function getHealthRecordsByType(animalId: number, recordType: Healt
       `
     )
     .all(animalId, recordType) as AnimalHealthRecord[]
-  
+
   return rows
 }
 
 export async function createHealthRecord(data: Omit<AnimalHealthRecord, 'id' | 'created_at' | 'updated_at'>): Promise<number> {
   const db = getDb()
   const now = new Date().toISOString()
-  
+
   const stmt = db.prepare(
     `
     INSERT INTO animal_health_records (
@@ -63,7 +63,7 @@ export async function updateHealthRecord(
 ): Promise<AnimalHealthRecord | undefined> {
   const db = getDb()
   const now = new Date().toISOString()
-  
+
   const current = await getHealthRecordById(id)
   if (!current) return undefined
 
@@ -98,20 +98,21 @@ export async function getHealthRecordById(id: number): Promise<AnimalHealthRecor
   const row = db
     .prepare('SELECT * FROM animal_health_records WHERE id = ?')
     .get(id) as AnimalHealthRecord | undefined
-  
+
   return row
 }
 
-export async function getUpcomingEvents(): Promise<(AnimalHealthRecord & { animal_name: string })[]> {
+export async function getUpcomingEvents(): Promise<(AnimalHealthRecord & { animal_name: string; tagNumber?: string })[]> {
   const db = getDb()
   const today = new Date().toISOString().split('T')[0]
-  
+
   const rows = db
     .prepare(
       `
       SELECT 
         ahr.*,
-        a.name as animal_name
+        a.name as animal_name,
+        a.tag_number as tagNumber
       FROM animal_health_records ahr
       JOIN animals a ON ahr.animal_id = a.id
       WHERE 
@@ -125,7 +126,7 @@ export async function getUpcomingEvents(): Promise<(AnimalHealthRecord & { anima
       LIMIT 10
       `
     )
-    .all(today, today) as (AnimalHealthRecord & { animal_name: string })[]
-  
+    .all(today, today) as (AnimalHealthRecord & { animal_name: string; tagNumber?: string })[]
+
   return rows
 }

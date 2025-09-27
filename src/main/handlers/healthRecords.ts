@@ -33,7 +33,7 @@ export function registerHealthRecordHandlers(): void {
     return healthRecordsRepo.deleteHealthRecord(id)
   })
 
-  ipcMain.handle('get-upcoming-events', async (): Promise<(AnimalHealthRecord & { animal_name: string })[]> => {
+  ipcMain.handle('get-upcoming-events', async (): Promise<(AnimalHealthRecord & { animal_name: string; tagNumber?: string })[]> => {
     return healthRecordsRepo.getUpcomingEvents()
   })
 }
