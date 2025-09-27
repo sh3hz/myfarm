@@ -41,6 +41,7 @@ interface Window {
   };
   api: {
     getAppInfo: () => Promise<any>
+    updateAppInfo: (appInfo: any) => Promise<any>
     getAnimalTypes: () => Promise<any[]>
     getAnimalType: (id: number) => Promise<any>
     createAnimalType: (name: string, description: string) => Promise<any>

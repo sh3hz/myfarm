@@ -4,6 +4,7 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { autoUpdater } from 'electron-updater'
 import icon from '../../resources/icon.png?asset'
 import { databaseService } from './database'
+import type { AppInfo } from './db/models'
 import { registerAnimalTypeHandlers } from './handlers/animalTypes'
 import { registerAnimalHandlers } from './handlers/animals'
 import { registerFileHandlers } from './handlers/files'
@@ -187,6 +188,16 @@ app.whenReady().then(() => {
       return appInfo
     } catch (error) {
       console.error('Main process - Error getting app info:', error)
+      throw error
+    }
+  })
+
+  ipcMain.handle('update-app-info', async (_, appInfo: Partial<AppInfo>) => {
+    try {
+      databaseService.updateAppInfo(appInfo)
+      return databaseService.getAppInfo()
+    } catch (error) {
+      console.error('Main process - Error updating app info:', error)
       throw error
     }
   })

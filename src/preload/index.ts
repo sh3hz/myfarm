@@ -3,6 +3,7 @@ import { contextBridge, ipcRenderer } from 'electron'
 // Custom APIs for renderer
 const api = {
   getAppInfo: () => ipcRenderer.invoke('get-app-info'),
+  updateAppInfo: (appInfo: any) => ipcRenderer.invoke('update-app-info', appInfo),
   // Animal Types API
   getAnimalTypes: () => ipcRenderer.invoke('get-animal-types'),
   getAnimalType: (id: number) => ipcRenderer.invoke('get-animal-type', id),
