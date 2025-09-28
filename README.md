@@ -123,7 +123,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## Author
 
 **shehaz.me**
-- Website: [https://myfarm.shehaz.me](https://myfarm.shehaz.me)
+- Website: [https://shehaz.me/myfarm-website](https://shehaz.me/myfarm-website)
 
 ## Version
 
